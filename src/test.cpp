@@ -20,6 +20,7 @@ class S21Matrix {
     this->rows_ = rows;
     this->cols_ = rows;
     // this->matrix_ = new double*[rows * rows]();
+    this->matrix_ = new double*[rows];
     for (int i = 0; i < rows; i++) {
       matrix_[i] = new double[rows]{0};
     }
@@ -38,7 +39,7 @@ class S21Matrix {
   ~S21Matrix() { delete[] matrix_; }
 
   void SumMatrix(const S21Matrix& other) {
-    if (this->rows_ != other.rows_ && this->cols_ != other.cols_) {
+    if (this->rows_ != other.rows_ || this->cols_ != other.cols_) {
       throw std::exception();
 
     } else if (this->matrix_ == NULL || other.matrix_ == NULL) {
@@ -60,7 +61,7 @@ class S21Matrix {
   // }
 
   void SubMatrix(const S21Matrix& other) {
-    if (this->rows_ != other.rows_ && this->cols_ != other.cols_) {
+    if (this->rows_ != other.rows_ || this->cols_ != other.cols_) {
       throw std::exception();
 
     } else if (this->matrix_ == NULL || other.matrix_ == NULL) {
@@ -75,7 +76,7 @@ class S21Matrix {
   }
 
   void EqMatrix(const S21Matrix& other) {
-    if (this->rows_ != other.rows_ && this->cols_ != other.cols_) {
+    if (this->rows_ != other.rows_ || this->cols_ != other.cols_) {
       throw std::exception();
 
     } else if (this->matrix_ == NULL || other.matrix_ == NULL) {
@@ -121,6 +122,14 @@ class S21Matrix {
     //   }
     // }
   }
+
+  void printMatr() {
+    for (int i = 0; i < this->rows_; i++) {
+      for (int j = 0; j < this->cols_; j++) {
+        std::cout << this->matrix_[i][j] << std::endl;
+      }
+    }
+  }
 };
 
 int main() {
@@ -128,7 +137,7 @@ int main() {
 
   {
     S21Matrix* pM = new S21Matrix(4, 5);
-    S21Matrix* pM2 = new S21Matrix(4, 5);
+    S21Matrix* pM2 = new S21Matrix(4);  //
     // S21Matrix* pMres = new S21Matrix(4, 5);
     // pM->SumMatrix->matrix_[0][0] = 1.0;
     pM2->setMatrix(0, 0, 1);
@@ -136,6 +145,7 @@ int main() {
     std::cout << pM->getMatrix(0, 0) << std::endl;
     pM->SubMatrix(*pM2);
     std::cout << pM->getMatrix(0, 0) << std::endl;
+    // pM->printMatr();
     delete pM;
     delete pM2;
   } catch (const std::exception& err) {
