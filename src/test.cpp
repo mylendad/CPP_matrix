@@ -5,7 +5,7 @@
 class S21Matrix {
  private:
   int rows_, cols_;
-  double** matrix_;
+  double** matrix_ = nullptr;
 
  public:
   // S21Matrix() : rows_{3}, cols_{3} {
@@ -26,9 +26,6 @@ class S21Matrix {
   // }
 
   S21Matrix(int rows, int cols) : rows_{rows}, cols_{cols} {
-    // this->rows_ = rows;
-    // this->cols_ = cols;
-    // this->matrix_ = new double*[rows * rows]();
     this->matrix_ = new double*[rows];
     for (int i = 0; i < rows; i++) {
       this->matrix_[i] = new double[cols]{0};
@@ -45,8 +42,8 @@ class S21Matrix {
     // if (this->rows_ != other.rows_ || this->cols_ != other.cols_) {
     //   throw std::exception();
     // }
-
-    this->matrix_ = new double*[other.rows_];
+    std::cerr << "hi" << std::endl;
+    this->matrix_ = new double*[other.rows_];  // вынести
     for (int i = 0; i < other.rows_; i++) {
       matrix_[i] = new double[this->cols_]{0};
       std::memcpy(this->matrix_[i], other.matrix_[i],
@@ -55,25 +52,32 @@ class S21Matrix {
       // *other.matrix_[i]
       // << "!" << std::endl;
     }
+    std::cerr << this->matrix_ << "!!!" << std::endl;
+    std::cerr << other.matrix_ << "!!!" << std::endl;
   }
 
   S21Matrix(const S21Matrix&& other) : rows_(other.rows_), cols_(other.cols_) {
-    if (this->rows_ == other.rows_ && this->cols_ == other.cols_) {
-      for (int i = 0; i < other.rows_; i++) {
-        std::memcpy(this->matrix_[i], other.matrix_[i],
-                    other.cols_ * sizeof(double));
-      }
-
-    } else {
-      this->matrix_ = new double*[other.rows_];
-      for (int i = 0; i < other.rows_; i++) {
-        matrix_[i] = new double[this->cols_]{0};
-        std::memcpy(this->matrix_[i], other.matrix_[i],
-                    other.cols_ * sizeof(double));
-      }
+    // if (this->rows_ != other.rows_ && this->cols_ != other.cols_)
+    this->matrix_ = new double*[other.rows_];  // вынести
+    for (int i = 0; i < other.rows_; i++) {
+      matrix_[i] = new double[this->cols_]{0};
+      std::memcpy(this->matrix_[i], other.matrix_[i],
+                  other.cols_ * sizeof(double));
+      // std::cerr << "!" << *this->matrix_[i] << "!" << " !" <<
+      // *other.matrix_[i]
+      // << "!" << std::endl;
     }
+
+    // } else {
+    this->matrix_ = new double*[other.rows_];
+    for (int i = 0; i < other.rows_; i++) {
+      matrix_[i] = new double[this->cols_]{0};
+      std::memcpy(this->matrix_[i], other.matrix_[i],
+                  other.cols_ * sizeof(double));
+    }
+    // }
     for (int i = 0; i < this->rows_; i++) {
-      delete[] this->matrix_[i];
+      delete[] other.matrix_[i];
     }
   }
 
@@ -98,13 +102,15 @@ class S21Matrix {
   }
 
   const S21Matrix& operator=(
-      const S21Matrix& other) {  // спросить как это работает
-    if (&other == this) return *this;
-    for (int i = 0; i < this->rows_; i++) {
-      delete[] this->matrix_[i];
+      const S21Matrix& left) {  // спросить как это работает
+    if (&left == this) return *this;
+    if (this->matrix_ != nullptr) {
+      for (int i = 0; i < this->rows_; i++) {
+        delete[] this->matrix_[i];
+      }
+      delete[] this->matrix_;
     }
-    delete[] this->matrix_;
-    *this = other;  // испраить или оставить так?
+    *this = left;  // испраить или оставить так?
     return *this;
   }
 
@@ -216,17 +222,19 @@ int main() {
     pM2->setNumToMatrix(0, 0, 1.0);
     pM->SumMatrix(*pM2);
     std::cout << pM->getMatrix(0, 0) << std::endl;
-    S21Matrix* pMres{pM};  // copy
-
-    std::cout << pMres->getMatrix(0, 0) << std::endl;
+    S21Matrix pMres{*pM};  // copy
+    pMres.printMatr();
+    std::cout << pMres.getMatrix(0, 0) << std::endl;
     pM->SubMatrix(*pM2);
     std::cout << pM->getMatrix(0, 0) << std::endl;
     S21Matrix* pM21 = pM2;
     std::cout << pM21->getMatrix(0, 0) << std::endl;
-    pM21->printMatr();
+    ы pM21->printMatr();
+    S21Matrix matrix2(std::move(*pM2));  // вроде робит
+    matrix2.printMatr();
 
-    delete pM21;
-    delete pMres;
+    // delete pM21;
+    // delete pMres;
     delete pM;
     delete pM2;
   } catch (const std::exception& err) {
@@ -234,6 +242,4 @@ int main() {
   }
 
   return 0;
-
-  // delete pMres;
 }
