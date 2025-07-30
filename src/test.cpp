@@ -8,26 +8,26 @@ class S21Matrix {
   double** matrix_;
 
  public:
-  S21Matrix() : rows_{3}, cols_{3} {
-    this->matrix_ = new double*[this->rows_ * this->cols_]();
-    for (int i = 0; i < this->rows_; i++) {
-      matrix_[i] = new double[this->cols_]{0};
-    }
-  }
+  // S21Matrix() : rows_{3}, cols_{3} {
+  //   this->matrix_ = new double*[rows_];
+  //   for (int i = 0; i < this->rows_; i++) {
+  //     matrix_[i] = new double[this->cols_]{0};
+  //   }
+  // }
 
-  S21Matrix(int rows) {
-    this->rows_ = rows;
-    this->cols_ = rows;
-    // this->matrix_ = new double*[rows * rows]();
-    this->matrix_ = new double*[rows];
-    for (int i = 0; i < rows; i++) {
-      matrix_[i] = new double[rows]{0};
-    }
-  }
+  // S21Matrix(int rows) : rows_{rows}, cols_{rows} {
+  //   // this->rows_ = rows;
+  //   // this->cols_ = rows;
+  //   // this->matrix_ = new double*[rows * rows]();
+  //   this->matrix_ = new double*[rows];
+  //   for (int i = 0; i < rows; i++) {
+  //     matrix_[i] = new double[rows]{0};
+  //   }
+  // }
 
-  S21Matrix(int rows, int cols) {
-    this->rows_ = rows;
-    this->cols_ = cols;
+  S21Matrix(int rows, int cols) : rows_{rows}, cols_{cols} {
+    // this->rows_ = rows;
+    // this->cols_ = cols;
     // this->matrix_ = new double*[rows * rows]();
     this->matrix_ = new double*[rows];
     for (int i = 0; i < rows; i++) {
@@ -35,9 +35,17 @@ class S21Matrix {
     }
   }
 
+  S21Matrix(int rows) : S21Matrix(rows, rows) {}
+
+  S21Matrix() : S21Matrix(3, 3) {}
+
   ~S21Matrix() { delete[] matrix_; }
 
   S21Matrix(const S21Matrix& other) : rows_(other.rows_), cols_(other.cols_) {
+    // if (this->rows_ != other.rows_ || this->cols_ != other.cols_) {
+    //   throw std::exception();
+    // }
+
     this->matrix_ = new double*[other.rows_];
     for (int i = 0; i < other.rows_; i++) {
       matrix_[i] = new double[this->cols_]{0};
@@ -49,17 +57,36 @@ class S21Matrix {
     }
   }
 
-  void SumMatrix(const S21Matrix& other) {
-    if (this->rows_ != other.rows_ || this->cols_ != other.cols_) {
-      throw std::exception();
+  S21Matrix(const S21Matrix&& other) : rows_(other.rows_), cols_(other.cols_) {
+    if (this->rows_ == other.rows_ && this->cols_ == other.cols_) {
+      for (int i = 0; i < other.rows_; i++) {
+        std::memcpy(this->matrix_[i], other.matrix_[i],
+                    other.cols_ * sizeof(double));
+      }
 
-    } else if (this->matrix_ == nullptr || other.matrix_ == nullptr) {
-      throw std::exception();
+    } else {
+      this->matrix_ = new double*[other.rows_];
+      for (int i = 0; i < other.rows_; i++) {
+        matrix_[i] = new double[this->cols_]{0};
+        std::memcpy(this->matrix_[i], other.matrix_[i],
+                    other.cols_ * sizeof(double));
+      }
     }
-    S21Matrix(this->rows_, this->cols_);
     for (int i = 0; i < this->rows_; i++) {
-      for (int j = 0; j < this->cols_; j++) {
-        this->matrix_[i][j] += other.matrix_[i][j];
+      delete[] this->matrix_[i];
+    }
+  }
+
+  void SumMatrix(const S21Matrix& other) {
+    if (this->rows_ != other.rows_ || this->cols_ != other.cols_ ||
+        this->matrix_ == nullptr || other.matrix_ == nullptr) {
+      throw std::exception();
+    } else {
+      S21Matrix(this->rows_, this->cols_);
+      for (int i = 0; i < this->rows_; i++) {
+        for (int j = 0; j < this->cols_; j++) {
+          this->matrix_[i][j] += other.matrix_[i][j];
+        }
       }
     }
   }
@@ -70,26 +97,32 @@ class S21Matrix {
     this->SumMatrix(other);
   }
 
-  const S21Matrix& operator=(const S21Matrix& other) {
+  const S21Matrix& operator=(
+      const S21Matrix& other) {  // спросить как это работает
+    if (&other == this) return *this;
     for (int i = 0; i < this->rows_; i++) {
       delete[] this->matrix_[i];
     }
     delete[] this->matrix_;
-    *this = other;
-    return other;
+    *this = other;  // испраить или оставить так?
+    return *this;
   }
 
   void SubMatrix(const S21Matrix& other) {
-    if (this->rows_ != other.rows_ || this->cols_ != other.cols_) {
+    if (this->rows_ != other.rows_ || this->cols_ != other.cols_ ||
+        this->matrix_ == nullptr || other.matrix_ == nullptr) {
       throw std::exception();
 
-    } else if (this->matrix_ == nullptr || other.matrix_ == nullptr) {
-      throw std::exception();
     }
-    S21Matrix(this->rows_, this->cols_);
-    for (int i = 0; i < this->rows_; i++) {
-      for (int j = 0; j < this->cols_; j++) {
-        this->matrix_[i][j] -= other.matrix_[i][j];
+    // else if (this->matrix_ == nullptr || other.matrix_ == nullptr) {
+    //   throw std::exception();
+    // }
+    else {
+      S21Matrix(this->rows_, this->cols_);
+      for (int i = 0; i < this->rows_; i++) {
+        for (int j = 0; j < this->cols_; j++) {
+          this->matrix_[i][j] -= other.matrix_[i][j];
+        }
       }
     }
   }
@@ -124,9 +157,9 @@ class S21Matrix {
   //   other.cols_ = 0;
   // }
 
-  int getRows() { return this->rows_; }
+  int getRows() const { return this->rows_; }
 
-  int getCols() { return this->cols_; }
+  int getCols() const { return this->cols_; }
 
   void setRows(int rows) { this->rows_ = rows; }
 
@@ -175,22 +208,25 @@ int main() {
   try
 
   {
-    S21Matrix* pM = new S21Matrix(4, 5);
+    S21Matrix* pM = new S21Matrix(5, 4);
 
-    S21Matrix* pM2 = new S21Matrix(4, 5);  //
+    S21Matrix* pM2 = new S21Matrix(5, 4);  //
     // S21Matrix* pMres = new S21Matrix(4, 5);
     // pM->SumMatrix->matrix_[0][0] = 1.0;
     pM2->setNumToMatrix(0, 0, 1.0);
     pM->SumMatrix(*pM2);
     std::cout << pM->getMatrix(0, 0) << std::endl;
-    S21Matrix pMres{*pM};  // copy
-    std::cout << pMres.getMatrix(0, 0) << std::endl;
+    S21Matrix* pMres{pM};  // copy
+
+    std::cout << pMres->getMatrix(0, 0) << std::endl;
     pM->SubMatrix(*pM2);
     std::cout << pM->getMatrix(0, 0) << std::endl;
     S21Matrix* pM21 = pM2;
     std::cout << pM21->getMatrix(0, 0) << std::endl;
     pM21->printMatr();
 
+    delete pM21;
+    delete pMres;
     delete pM;
     delete pM2;
   } catch (const std::exception& err) {
