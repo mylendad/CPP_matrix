@@ -22,9 +22,17 @@ class S21Matrix {
 
   void SumMatrix(const S21Matrix& other);
 
-  const S21Matrix& operator+(const S21Matrix& other);
+  S21Matrix& operator+(const S21Matrix& other);
 
-  const S21Matrix copy(const S21Matrix& other);
+  S21Matrix& operator+=(const S21Matrix& other);
+
+  S21Matrix& operator-=(const S21Matrix& other);
+
+  double& operator()(int i, int j);
+
+  // double&& operator()(int i, int j);
+
+  void copy(const S21Matrix& other);
 
   void cleanMatrix();
 
@@ -32,33 +40,33 @@ class S21Matrix {
 
   void SubMatrix(const S21Matrix& other);
 
-  void EqMatrix(const S21Matrix& other);
+  int EqMatrix(const S21Matrix& other);
 
-  int getRows() const { return this->rows_; }
+  int getRows() const;
 
-  int getCols() const { return this->cols_; }
+  int getCols() const;
 
   void setRows(int rows);
 
   void setCols(int cols);
 
-  double getMatrix(int row, int col) const {
-    // for (int i = 0; i < this->rows_; i++) {
-    //   for (int j = 0; j < this->cols_; j++) {
-    return this->matrix_[row][col];
-    //   }
-    // }
-  }
+  double getMatrix(int row, int col) const;
 
   void setNumToMatrix(int row, int col, double number);
 
   void printMatr();
 };
 
+double s21_trimer_numb(double src);
+
 S21Matrix::S21Matrix(int rows, int cols) : rows_{rows}, cols_{cols} {
-  this->matrix_ = new double*[rows];
-  for (int i = 0; i < rows; i++) {
-    this->matrix_[i] = new double[cols]{0};
+  if (this->rows_ != 0 && this->cols_ != 0) {
+    this->matrix_ = new double*[rows];
+    for (int i = 0; i < rows; i++) {
+      this->matrix_[i] = new double[cols]{0};
+    }
+  } else {
+    throw std::exception();
   }
 }
 
@@ -70,17 +78,13 @@ S21Matrix::~S21Matrix() { this->cleanMatrix(); }
 
 S21Matrix::S21Matrix(const S21Matrix& other)
     : rows_(other.rows_), cols_(other.cols_) {
-  this->matrix_ = new double*[other.rows_];  // вынести
-  for (int i = 0; i < other.rows_; i++) {
-    matrix_[i] = new double[this->cols_]{0};
-    std::memcpy(this->matrix_[i], other.matrix_[i],
-                other.cols_ * sizeof(double));
-    // std::cerr << "!" << *this->matrix_[i] << "!" << " !" <<
-    // *other.matrix_[i]
-    // << "!" << std::endl;
+  if (this->rows_ != 0 && this->cols_ != 0) {
+    this->copy(other);
+  } else {
+    throw std::exception();
   }
-  std::cerr << this->matrix_ << "!!!in constructor" << std::endl;
-  std::cerr << other.matrix_ << "!!!in constructor" << std::endl;
+  // std::cerr << this->matrix_ << "!!!in constructor" << std::endl;
+  // std::cerr << other.matrix_ << "!!!in constructor" << std::endl;
 }
 
 S21Matrix::S21Matrix(S21Matrix&& other)
@@ -89,6 +93,7 @@ S21Matrix::S21Matrix(S21Matrix&& other)
   other.matrix_ = nullptr;
   other.rows_ = 0;
   other.cols_ = 0;
+  std::cerr << other.matrix_ << "!!!in perenos" << std::endl;
 }
 
 void S21Matrix::SumMatrix(const S21Matrix& other) {
@@ -105,22 +110,77 @@ void S21Matrix::SumMatrix(const S21Matrix& other) {
   }
 }
 
-const S21Matrix& S21Matrix::operator+(const S21Matrix& other) {
-  // creating result matrix
-
-  this->SumMatrix(other);
-
+const S21Matrix& S21Matrix::operator=(const S21Matrix& left) {
+  if (&left == this) return *this;
+  if (this->matrix_ != nullptr) {
+    this->cleanMatrix();
+  }
+  this->copy(left);
+  // std::cerr << this->matrix_ << "!!!inoperator=" << std::endl;
+  // std::cerr << left.matrix_ << "!!!inoperator=" << std::endl;
   return *this;
 }
 
-const S21Matrix S21Matrix::copy(const S21Matrix& other) {
-  // вынести
-  for (int i = 0; i < other.rows_; i++) {
-    this->matrix_[i] = new double[this->cols_]{0};
-    std::memcpy(this->matrix_[i], other.matrix_[i],
-                other.cols_ * sizeof(double));
-  }
+S21Matrix& S21Matrix::operator+(const S21Matrix& other) {
+  // creating result matrix
+
+  this->SumMatrix(other);
+  // std::cerr << this->matrix_ << "!!!inoperator+" << std::endl;
   return *this;
+}
+
+S21Matrix& S21Matrix::operator+=(const S21Matrix& other) {
+  if (this->matrix_ != nullptr) {
+    this->cleanMatrix();
+  }
+  this->copy(other);
+  this->SumMatrix(other);
+  return *this;
+}
+
+S21Matrix& S21Matrix::operator-=(const S21Matrix& other) {
+  if (this->matrix_ != nullptr) {
+    this->cleanMatrix();
+  }
+  this->copy(other);
+  this->SubMatrix(other);
+  return *this;
+}
+
+double& S21Matrix::operator()(int i, int j) {
+  if (i < this->rows_ && i >= 0 && j < this->cols_ && j >= 0)
+    return this->matrix_[i][j];
+  else
+    throw std::exception();
+}
+
+// double&& S21Matrix::operator()(int i, int j) {
+//   this->matrix_[i][j];
+//   this->matrix_ = nullptr;
+//   this->rows_ = 0;
+//   this->cols_ = 0;
+//  }
+
+void S21Matrix::copy(const S21Matrix& other) {
+  this->rows_ = other.rows_;
+  this->cols_ = other.cols_;
+  // std::cerr << this->matrix_ << "!!!copy begin" << std::endl;
+  if (other.rows_ != 0 && other.cols_ != 0) {
+    this->matrix_ = new double* [other.rows_] { 0 };
+    for (int i = 0; i < other.rows_; i++) {
+      // std::cerr << this->cols_ << "!!!this->cols_" << std::endl;
+      // std::cerr << other.cols_ << "!!other.cols_" << std::endl;
+      // std::cerr << "!!!new begin" << std::endl;
+      this->matrix_[i] = new double[other.cols_]{0};
+      // std::cerr << this->matrix_ << "!!!new end" << std::endl;
+      std::memcpy(this->matrix_[i], other.matrix_[i],
+                  other.cols_ * sizeof(double));
+    }
+  } else
+    throw std::exception();
+
+  // std::cerr << this->matrix_ << "!!!copy end" << std::endl;
+  // return *this;
 }
 
 void S21Matrix::cleanMatrix() {
@@ -128,28 +188,15 @@ void S21Matrix::cleanMatrix() {
     delete[] this->matrix_[i];
   }
   delete[] this->matrix_;
-}
-
-const S21Matrix& S21Matrix::operator=(const S21Matrix& left) {
-  if (&left == this) return *this;
-  if (this->matrix_ != nullptr) {
-    // for (int i = 0; i < this->rows_; i++) {
-    //   delete[] this->matrix_[i];
-    // }
-    // delete[] this->matrix_;
-    this->cleanMatrix();  // вернуть
-  }
-  this->copy(left);  // не срабатывает мой конструктор
-  std::cerr << this->matrix_ << "!!!inoperator=" << std::endl;
-  std::cerr << left.matrix_ << "!!!inoperator=" << std::endl;
-  // испраить или оставить так?
-  return *this;  // исправить? чтобы создавался новый адрес в памти как в
-                 // конструкторе копирования
+  this->matrix_ = nullptr;
+  this->rows_ = 0;
+  this->cols_ = 0;
 }
 
 void S21Matrix::SubMatrix(const S21Matrix& other) {
-  if (this->rows_ != other.rows_ || this->cols_ != other.cols_ ||
-      this->matrix_ == nullptr || other.matrix_ == nullptr) {
+  if (this->rows_ != other.rows_ || this->cols_ != other.cols_) {
+    throw std::exception();
+  } else if (this->matrix_ == nullptr || other.matrix_ == nullptr) {
     throw std::exception();
   } else {
     S21Matrix(this->rows_, this->cols_);
@@ -161,7 +208,8 @@ void S21Matrix::SubMatrix(const S21Matrix& other) {
   }
 }
 
-void S21Matrix::EqMatrix(const S21Matrix& other) {
+int S21Matrix::EqMatrix(const S21Matrix& other) {
+  int result = 0;
   if (this->rows_ != other.rows_ || this->cols_ != other.cols_) {
     throw std::exception();
 
@@ -170,30 +218,26 @@ void S21Matrix::EqMatrix(const S21Matrix& other) {
   }
   S21Matrix(this->rows_, this->cols_);
   for (int i = 0; i < this->rows_; i++) {
-    for (int j = 0; j < this->cols_; j++) {
-      this->matrix_[i][j] -= other.matrix_[i][j];
+    for (int j = 0; j < this->cols_ && result != 1; j++) {
+      if (s21_trimer_numb(this->matrix_[i][j]) ==
+          s21_trimer_numb(other.matrix_[i][j])) {
+        result = 0;
+        // std::cerr << "!!!result = 0" << std::endl;
+      } else {
+        // std::cerr << "!!!result = 1" << std::endl;
+        // std::cerr << i << " " << j << std::endl;
+        result = 1;
+        // break;  // delete
+      }
     }
   }
+
+  return result;
 }
 
-// S21Matrix::S21Matrix(S21Matrix&& other) {
-//   if (rows_ * cols_ == other.rows_ * other.cols_) {
-//     std::memcpy(p_, other.p_, other.cols_ * other.rows_ * sizeof(double));
-//   } else {
-//     delete[] p_;
-//     p_ = new double[other.rows_ * other.cols_]();
-//     std::memcpy(p_, other.p_, other.cols_ * other.rows_ * sizeof(double));
-//   }
-//   rows_ = other.rows_;
-//   cols_ = other.cols_;
-//   delete other.p_;
-//   other.rows_ = 0;
-//   other.cols_ = 0;
-// }
+int S21Matrix::getRows() const { return this->rows_; }
 
-// int S21Matrix::getRows() const { return this->rows_; }
-
-// int S21Matrix::getCols() const { return this->cols_; }
+int S21Matrix::getCols() const { return this->cols_; }
 
 void S21Matrix::setRows(int rows) {
   this->rows_ = rows;
@@ -204,33 +248,17 @@ void S21Matrix::setCols(int cols) {
   this->rows_ = cols;
   S21Matrix(this->rows_, this->cols_);
 }
-// double** setNumToMatrix(int rows, int cols, double number,
-//                    const S21Matrix& other) {
-//   for (int i = 0; i < rows; i++) {
-//     for (int j = 0; j < cols; j++) {
-//       other.matrix_[i][j] = number;
-//     }
-//   }
-// }
 
-// double S21Matrix::getMatrix(int row, int col) const {
-//   // for (int i = 0; i < this->rows_; i++) {
-//   //   for (int j = 0; j < this->cols_; j++) {
-//   return this->matrix_[row][col];
-//   //   }
-//   // }
-// }
+double S21Matrix::getMatrix(int row, int col) const {
+  return this->matrix_[row][col];
+}
 
 void S21Matrix::setNumToMatrix(int row, int col, double number) {
-  // for (int i = 0; i < this->rows_; i++) {
-  //   for (int j = 0; j < this->cols_; j++) {
   this->matrix_[row][col] = number;
-  //   }
-  // }
 }
 
 void S21Matrix::printMatr() {
-  std::cerr << "!!!" << this->matrix_ << "!!!" << std::endl;
+  std::cerr << "!!!address:" << this->matrix_ << "!!!" << std::endl;
   for (int i = 0; i < this->rows_; i++) {
     for (int j = 0; j < this->cols_; j++) {
       if (i == this->rows_ - 1 && j == this->cols_ - 1)
@@ -241,6 +269,15 @@ void S21Matrix::printMatr() {
         std::cout << this->matrix_[i][j] << " ";
     }
   }
+}
+
+double s21_trimer_numb(double src) {
+  double result = 0;
+  char buffer[20];  // add define
+
+  sprintf(buffer, "%.7lf", src);
+  sscanf(buffer, "%lf", &result);
+  return result;
 }
 
 int main() {
@@ -260,24 +297,39 @@ int main() {
     std::cout << pMres.getMatrix(0, 0) << std::endl;
     pM.SubMatrix(pM2);
     std::cout << pM.getMatrix(0, 0) << std::endl;
-    S21Matrix pM21 = pM2;  // так работает
+    S21Matrix pM21 = pM2;
+    pM21.SumMatrix(pM2);
     std::cout << pM21.getMatrix(0, 0) << std::endl;
     pM21.printMatr();
     pM2.printMatr();
-    S21Matrix matrix2(std::move(pM2));  // вроде робит
+    std::cerr << "!!!pMres eq pM2" << std::endl;
+    std::cerr << pMres.EqMatrix(pM2) << std::endl;
+    S21Matrix matrix2(std::move(pM2));
+    std::cerr << "!!!pM21 eq matrix2" << std::endl;
+    std::cerr << pM21.EqMatrix(matrix2) << std::endl;
     matrix2.printMatr();
     pM2.printMatr();
     pM2.printMatr();
     pM2.printMatr();
     S21Matrix MSum(5, 4);
     MSum.printMatr();
-    MSum = matrix2;  // а так не работает (Double free of object 0x7faf23f06350)
+    MSum = (matrix2 + matrix2) + matrix2;
+    std::cerr << "!!!matrix2" << std::endl;
+    matrix2.printMatr();
+    std::cerr << "!!!MSum" << std::endl;
     MSum.printMatr();
-
-    // delete pM21;
-    // delete pMres;
-    // delete pM;
-    // delete pM2;
+    MSum += matrix2;
+    std::cerr << "!!!MSum += matrix2;" << std::endl;
+    MSum.printMatr();
+    std::cerr << MSum(0, 0) << std::endl;
+    MSum(0, 0) = 777;
+    std::cerr << MSum(0, 0) << std::endl;
+    std::cerr << "!!!pM" << std::endl;
+    pM.printMatr();
+    std::cerr << "!!! MSum.EqMatrix(matrix2)" << std::endl;
+    std::cerr << MSum.EqMatrix(matrix2) << std::endl;
+    std::cerr << "!!! MSum.EqMatrix(pM)" << std::endl;
+    std::cerr << MSum.EqMatrix(pM) << std::endl;
   } catch (const std::exception& err) {
     std::cerr << "[exception] " << err.what() << std::endl;
   }
