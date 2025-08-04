@@ -42,6 +42,12 @@ class S21Matrix {
 
   int EqMatrix(const S21Matrix& other);
 
+  void MulNumber(const double number);
+
+  void MulMatrix(const S21Matrix& other);
+
+  S21Matrix Transpose();
+
   int getRows() const;
 
   int getCols() const;
@@ -97,8 +103,12 @@ S21Matrix::S21Matrix(S21Matrix&& other)
 }
 
 void S21Matrix::SumMatrix(const S21Matrix& other) {
-  if (this->rows_ != other.rows_ || this->cols_ != other.cols_ ||
-      this->matrix_ == nullptr || other.matrix_ == nullptr) {
+  if (this->rows_ != other.rows_ || this->cols_ != other.cols_) {
+    throw std::exception();
+  } else if (this->matrix_ == nullptr || other.matrix_ == nullptr) {
+    throw std::exception();
+  } else if (this->rows_ < 1 || this->cols_ < 1 || other.rows_ < 1 ||
+             other.cols_ < 1) {
     throw std::exception();
   } else {
     S21Matrix(this->rows_, this->cols_);
@@ -198,6 +208,9 @@ void S21Matrix::SubMatrix(const S21Matrix& other) {
     throw std::exception();
   } else if (this->matrix_ == nullptr || other.matrix_ == nullptr) {
     throw std::exception();
+  } else if (this->rows_ < 1 || this->cols_ < 1 || other.rows_ < 1 ||
+             other.cols_ < 1) {
+    throw std::exception();
   } else {
     S21Matrix(this->rows_, this->cols_);
     for (int i = 0; i < this->rows_; i++) {
@@ -205,6 +218,56 @@ void S21Matrix::SubMatrix(const S21Matrix& other) {
         this->matrix_[i][j] -= other.matrix_[i][j];
       }
     }
+  }
+}
+
+void S21Matrix::MulNumber(const double number) {
+  if (this->matrix_ == nullptr) {
+    throw std::exception();
+  } else if (this->rows_ < 1 || this->cols_ < 1) {
+    throw std::exception();
+  } else {
+    S21Matrix(this->rows_, this->cols_);
+    for (int i = 0; i < this->rows_; i++) {
+      for (int j = 0; j < this->cols_; j++) {
+        this->matrix_[i][j] *= number;
+      }
+    }
+  }
+}
+
+void S21Matrix::MulMatrix(const S21Matrix& other) {
+  if (this->rows_ != other.cols_ || this->cols_ != other.rows_) {
+    throw std::exception();
+  } else if (this->matrix_ == nullptr || other.matrix_ == nullptr) {
+    throw std::exception();
+  } else if (this->rows_ < 1 || this->cols_ < 1 || other.rows_ < 1 ||
+             other.cols_ < 1) {
+    throw std::exception();
+  } else {
+    S21Matrix(this->rows_, this->cols_);
+    for (int i = 0; i < this->rows_; i++) {
+      for (int j = 0; j < this->cols_; j++) {
+        for (int k = 0; k < other.rows_; k++)
+          this->matrix_[i][j] += (this->matrix_[i][k] * other.matrix_[k][j]);
+      }
+    }
+  }
+}
+
+S21Matrix S21Matrix::Transpose() {
+  if (this->matrix_ == nullptr) {
+    throw std::exception();
+  } else if (this->rows_ < 1 || this->cols_ < 1) {
+    throw std::exception();
+  } else {
+    S21Matrix res(this->rows_, this->cols_);
+    for (int i = 0; i < this->rows_; i++) {
+      for (int j = 0; j < this->cols_; j++) {
+        res.matrix_[i][j] = this->matrix_[j][i];
+      }
+    }
+    return res;
   }
 }
 
@@ -284,12 +347,15 @@ int main() {
   try
 
   {
+    std::cerr << "!!!start" << std::endl;
     S21Matrix pM(5, 4);
 
     S21Matrix pM2(5, 4);  //
     // S21Matrix* pMres = new S21Matrix(4, 5);
     // pM->SumMatrix->matrix_[0][0] = 1.0;
     pM2.setNumToMatrix(0, 0, 1.0);
+    pM2.printMatr();
+    pM.printMatr();
     pM.SumMatrix(pM2);
     std::cout << pM.getMatrix(0, 0) << std::endl;
     S21Matrix pMres{pM};  // copy
@@ -322,7 +388,23 @@ int main() {
     std::cerr << "!!!MSum += matrix2;" << std::endl;
     MSum.printMatr();
     std::cerr << MSum(0, 0) << std::endl;
-    MSum(0, 0) = 777;
+    MSum(0, 0) = 1;
+    MSum(0, 1) = 2;
+    MSum(0, 2) = 3;
+    MSum(0, 3) = 4;
+    MSum(1, 0) = 5;
+    MSum(1, 1) = 6;
+    MSum(1, 2) = 7;
+    MSum(1, 3) = 8;
+    MSum(2, 0) = 9;
+    MSum(2, 1) = 10;
+    std::cerr << "!!!MSum" << std::endl;
+    MSum.printMatr();
+    S21Matrix pM22 = MSum.Transpose();
+    std::cerr << "!!! MSum.Transpose();" << std::endl;
+    std::cerr << "!!!MSum" << std::endl;
+    pM22.printMatr();
+    std::cerr << MSum(0, 0) << std::endl;
     std::cerr << MSum(0, 0) << std::endl;
     std::cerr << "!!!pM" << std::endl;
     pM.printMatr();
