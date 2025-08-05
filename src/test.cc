@@ -3,6 +3,17 @@
 #include <cstring>
 #include <iostream>
 #include <stdexcept>
+#include <string>
+
+class MyDetailedException : public std::exception {
+ private:
+  std::string message_;
+
+ public:
+  MyDetailedException(const std::string& msg) : message_(msg) {}
+
+  const char* what() const noexcept override { return message_.c_str(); }
+};
 
 class S21Matrix {
  private:
@@ -157,35 +168,20 @@ const S21Matrix& S21Matrix::operator=(const S21Matrix& other) {
   return *this;
 }
 
-S21Matrix& S21Matrix::operator=(const S21Matrix&& other) noexcept {
-  // if (&other == this) return *this;
+S21Matrix& S21Matrix::operator=(S21Matrix&& other) noexcept {
+  if (&other == this) return *this;
+
+  if (this->matrix_ != nullptr) {
+    this->CleanMatrix();
+  }
   this->rows_ = other.rows_;
   this->cols_ = other.cols_;
   this->matrix_ = other.matrix_;
-  other.matrix_ = nullptr;  // ??
-  other.rows_ = 0;          // ??
+  other.matrix_ = nullptr;
+  other.rows_ = 0;
   other.cols_ = 0;
   return *this;
 }
-
-// S21Matrix& S21Matrix::operator=(S21Matrix&& other) noexcept {
-//     if (this == &other) return *this; // Проверяем самоприсваивание
-
-//     // Освобождаем текущие ресурсы
-//     delete[] matrix_; // Освобождаем текущую память
-
-//     // Перемещаем данные из другого объекта
-//     rows_ = other.rows_;
-//     cols_ = other.cols_;
-//     matrix_ = other.matrix_;
-
-//     // Обнуляем перемещаемые ресурсы
-//     other.matrix_ = nullptr;
-//     other.rows_ = 0;
-//     other.cols_ = 0;
-
-//     return *this;
-// }
 
 S21Matrix& S21Matrix::operator+(const S21Matrix& other) {
   // creating result matrix
@@ -330,7 +326,7 @@ S21Matrix S21Matrix::Transpose() {
 int S21Matrix::EqMatrix(const S21Matrix& other) {
   int result = 0;
   if (this->rows_ != other.rows_ || this->cols_ != other.cols_) {
-    throw std::exception();
+    throw MyDetailedException("efwef");
 
   } else if (this->matrix_ == nullptr || other.matrix_ == nullptr) {
     throw std::exception();
