@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include <cstring>
 #include <iostream>
 #include <stdexcept>
@@ -57,6 +59,14 @@ class S21Matrix {
   void setCols(int cols);
 
   double getMatrix(int row, int col) const;
+
+  S21Matrix s21_calc_complements();
+
+  double s21_calc_minors(int rows);
+
+  S21Matrix s21_create_determinant_matrix(int rows);
+
+  double s21_end_unit(S21Matrix& other);
 
   void setNumToMatrix(int row, int col, double number);
 
@@ -261,9 +271,9 @@ S21Matrix S21Matrix::Transpose() {
   } else if (this->rows_ < 1 || this->cols_ < 1) {
     throw std::exception();
   } else {
-    S21Matrix res(this->rows_, this->cols_);
-    for (int i = 0; i < this->rows_; i++) {
-      for (int j = 0; j < this->cols_; j++) {
+    S21Matrix res(this->cols_, this->rows_);
+    for (int i = 0; i < this->cols_; i++) {
+      for (int j = 0; j < this->rows_; j++) {
         res.matrix_[i][j] = this->matrix_[j][i];
       }
     }
@@ -334,6 +344,82 @@ void S21Matrix::printMatr() {
   }
 }
 
+S21Matrix S21Matrix::s21_calc_complements() {
+  if (this->matrix_ == nullptr) {
+    throw std::exception();
+  } else if (this->rows_ != this->cols_) {
+    throw std::exception();
+  } else if (this->rows_ <= 1) {
+    throw std::exception();
+  }
+  // int res = 0;
+  // if (this->rows_ == 1) res = 1;
+  // int flag = 0;
+  S21Matrix res = S21Matrix(this->rows_);
+  std::cerr << "!!! пока все ок!;" << std::endl;
+  if (this->rows_ == 1) {
+    this->matrix_[0][0] = this->matrix_[0][0];
+  } else if (this->rows_ == 2) {
+    for (int i = 0; i < this->rows_; i++) {
+      for (int j = 0; j < this->rows_; j++) {
+        res.matrix_[this->rows_ - 1 - i][this->rows_ - 1 - j] =
+            this->matrix_[i][j] * pow(-1, ((i + 1) + (j + 1)));
+      }
+    }
+  } else {
+    for (int i = 0; i < this->rows_; i++) {
+      for (int j = 0; j < this->rows_; j++) {
+        res.matrix_[i][j] =
+            s21_calc_minors(j) *
+            pow(-1, ((this->rows_ + 1 - i) + (this->rows_ + 1 - j)));
+      }
+    }
+    // res = 0;
+  }
+  return res;
+}
+
+S21Matrix S21Matrix::s21_create_determinant_matrix(int rows) {
+  S21Matrix res = S21Matrix(rows - 1);
+
+  for (int i = 0, x = 0; i < rows; i++) {  // change x, y
+    for (int j = 0, y = 0; j < rows; j++) {
+      if (j != rows && i != rows) {
+        res.matrix_[x][y] = this->matrix_[i][j];  // change x, y
+        y++;
+      }
+      if (y == rows - 1) {
+        y = 0;
+        x++;
+      }
+    }
+  }
+  return res;
+}
+
+double S21Matrix::s21_calc_minors(int rows) {
+  std::cerr << "!!! начало s21_calc_minors!;" << std::endl;
+  double minor = 0;
+  S21Matrix temp = S21Matrix(rows);
+  std::cerr << "!!! все еще ок!;" << std::endl;
+  if (this->rows_ > 2) temp = s21_create_determinant_matrix(rows);
+  if (this->rows_ == 2) minor = s21_end_unit(temp);
+
+  for (int j = 0; j < rows - 1; j++) {
+    double a = s21_calc_minors(rows) * temp.matrix_[0][j];
+    if (j % 2 > 0) a *= -1;
+    minor += a;
+  }
+  return minor;
+}
+
+double S21Matrix::s21_end_unit(S21Matrix& other) {
+  double result = 0.0;
+  result = (other.matrix_[0][0] * other.matrix_[1][1]) -
+           (other.matrix_[0][1] * other.matrix_[1][0]);
+  return result;
+}
+
 double s21_trimer_numb(double src) {
   double result = 0;
   char buffer[20];  // add define
@@ -348,9 +434,9 @@ int main() {
 
   {
     std::cerr << "!!!start" << std::endl;
-    S21Matrix pM(5, 4);
+    S21Matrix pM(4, 4);
 
-    S21Matrix pM2(5, 4);  //
+    S21Matrix pM2(4, 4);  //
     // S21Matrix* pMres = new S21Matrix(4, 5);
     // pM->SumMatrix->matrix_[0][0] = 1.0;
     pM2.setNumToMatrix(0, 0, 1.0);
@@ -377,7 +463,7 @@ int main() {
     pM2.printMatr();
     pM2.printMatr();
     pM2.printMatr();
-    S21Matrix MSum(5, 4);
+    S21Matrix MSum(4, 4);
     MSum.printMatr();
     MSum = (matrix2 + matrix2) + matrix2;
     std::cerr << "!!!matrix2" << std::endl;
@@ -398,12 +484,24 @@ int main() {
     MSum(1, 3) = 8;
     MSum(2, 0) = 9;
     MSum(2, 1) = 10;
+    MSum(2, 2) = 11;
+    MSum(2, 3) = 12;
+    MSum(3, 0) = 13;
+    MSum(3, 1) = 14;
+    MSum(3, 2) = 15;
+    MSum(3, 3) = 16;
     std::cerr << "!!!MSum" << std::endl;
     MSum.printMatr();
     S21Matrix pM22 = MSum.Transpose();
     std::cerr << "!!! MSum.Transpose();" << std::endl;
-    std::cerr << "!!!MSum" << std::endl;
+    std::cerr << "!!!pM22" << std::endl;
     pM22.printMatr();
+
+    S21Matrix pM23 = MSum.s21_calc_complements();
+    std::cerr << "!!!pM23 = MSum.s21_calc_complements();" << std::endl;
+    std::cerr << "!!!pM23" << std::endl;
+    pM23.printMatr();
+
     std::cerr << MSum(0, 0) << std::endl;
     std::cerr << MSum(0, 0) << std::endl;
     std::cerr << "!!!pM" << std::endl;
