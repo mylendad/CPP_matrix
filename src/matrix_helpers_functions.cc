@@ -1,4 +1,4 @@
-#include "matrix.hh"
+#include "s21_matrix_oop.h"
 
 void S21Matrix::CopyMatrix(const S21Matrix& other) {
   this->rows_ = other.rows_;
@@ -63,41 +63,14 @@ void S21Matrix::PrintMatr() {
   }
 }
 
-S21Matrix S21Matrix::CalcComplements() {
-  if (this->rows_ != this->cols_) {
-    throw std::invalid_argument("The matrix is not square.");
-  }
-  S21Matrix res(this->rows_);
-  if (this->rows_ == 1) {
-    this->matrix_[0][0] = this->matrix_[0][0];
-  } else if (this->rows_ == 2) {
-    for (int i = 0; i < this->rows_; i++) {
-      for (int j = 0; j < this->rows_; j++) {
-        res.matrix_[this->rows_ - 1 - i][this->rows_ - 1 - j] =
-            this->matrix_[i][j] * pow(-1, ((i + 1) + (j + 1)));
-      }
-    }
-  } else if (this->rows_ != 0) {
-    for (int i = 0; i < this->rows_; i++) {
-      for (int j = 0; j < this->rows_; j++) {
-        res.matrix_[i][j] =
-
-            CalcMinors(*this, i, j) *
-            pow(-1, ((this->rows_ + 1 - i) + (this->rows_ + 1 - j)));
-      }
-    }
-  }
-  return res;
-}
-
 S21Matrix S21Matrix::CreateDeterminateMatrix(S21Matrix& other, int row,
                                              int col) {
-  if (other.matrix_ == nullptr) {
-    throw std::exception();
+  // if (other.matrix_ == nullptr) {
+  //   throw std::exception();
 
-  } else if (other.rows_ < 1) {
-    throw std::exception();
-  }
+  // } else if (other.rows_ < 1) {
+  //   throw std::exception();
+  // }
   S21Matrix res(other.rows_ - 1);
   for (int i = 0, x = 0; i < other.rows_; i++) {
     for (int j = 0, y = 0; j < other.rows_; j++) {
@@ -115,25 +88,46 @@ S21Matrix S21Matrix::CreateDeterminateMatrix(S21Matrix& other, int row,
 }
 
 double S21Matrix::CalcMinors(S21Matrix& other, int row, int col) {
-  if (other.matrix_ == nullptr) {
-    throw std::exception();
-  } else if (this->rows_ < 1) {
-    throw std::exception();
-  }
+  // if (other.matrix_ == nullptr) {
+  //   throw std::exception();
+  // } else if (this->rows_ < 1) {
+  //   throw std::exception();
+  // }
+
   double minor = 0.0;
-  int size_matrix = this->rows_;
+  // int size_matrix = this->rows_;
   S21Matrix temp;
-  if (other.rows_ > 2) {
-    temp = CreateDeterminateMatrix(other, row, col);
-    for (int j = 0; j < size_matrix - 1; j++) {
+  if (other.rows_ > 2) temp = CreateDeterminateMatrix(other, row, col);
+  if (temp.rows_ == 2) minor = EndUnit(temp);
+  if (temp.rows_ > 2)
+    for (int j = 0; j < temp.rows_ - 1; j++) {
       double a = CalcMinors(temp, 0, j) * temp.matrix_[0][j];
       if (j % 2 > 0) a *= -1;
       minor += a;
     }
-  } else if (other.rows_ == 2)
-    minor = EndUnit(temp);
+  // std::cout << "!!!CalcMinors" << other.rows_ << minor << std::endl;
   return minor;
 }
+
+// double S21Matrix::CalcMinors(S21Matrix& other, int row, int col) {
+//   double minor = 0.0;
+//   int size_matrix = this->rows_;
+//   S21Matrix temp;
+//   if (other.rows_ > 2) {
+//     temp = CreateDeterminateMatrix(other, row, col);
+//     for (int j = 0; j < size_matrix - 1; j++) {
+//       double a = CalcMinors(temp, 0, j) * temp.matrix_[0][j];
+//       if (j % 2 > 0) a *= -1;
+//       minor += a;
+//     }
+//   } else if (other.rows_ == 2)
+//     std::cout << "!!! other.rows_ == 2" << other.rows_ << std::endl;
+//   minor = EndUnit(temp);
+
+//   // delete temp;
+//   std::cout << "!!! end calc minors" << other.rows_ << std::endl;
+//   return minor;
+// }
 
 double S21Matrix::EndUnit(S21Matrix& other) {
   double result = 0.0;

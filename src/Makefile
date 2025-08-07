@@ -1,19 +1,20 @@
 CC = g++
-CFLAGS = -Wall -Werror -Wextra -g
+CFLAGS = -Wall  -g
 STD = -std=c++20 
-CHECK = -lcheck
 GCOV_FLAGS = -fprofile-arcs -ftest-coverage
+GTEST_FLAGS = -lgtest
 CLANG_FORMAT = clang-format-18
-SRC_FILES = matrix.cc matrix_helpers_functions.cc
-# SRC_TEST = ./tests/tests.c
+SRC_FILES = s21_matrix_oop.cc matrix_helpers_functions.cc
+SRC_TEST = ./tests/tests.cc
 OBJ_FILES = ./*.o
 
-# ifeq ($(shell uname), Linux)
-# 	CHECK += -lm -lsubunit
-# else
-# 	CHECK = -lcheck
-# 	CLANG_FORMAT = clang-format
-# endif
+ifeq ($(shell uname), Linux)
+	GTEST_FLAGS += -lgtest
+else
+	GTEST_FLAGS += -ld64
+	# GTEST_FLAGS = -lgtest
+	CLANG_FORMAT = clang-format
+endif
 
 all: all, clean, test, s21_matrix_oop.a
 
@@ -22,8 +23,8 @@ s21_matrix_oop.a:
 	ar rcs s21_matrix_oop.a $(OBJ_FILES)
 	rm -rf $(OBJ_FILES)
 
-test: s21_matrix_oop.a
-	$(CC) $(CFLAGS) $(SRC_TEST) -L. $(SRC_FILES) $(CHECK) -o s21_test 
+test: s21_matrix_oop.a $(SRC_TEST)
+	$(CC) $(CFLAGS) $(STD) $(SRC_TEST) -L. -o s21_test s21_matrix_oop.a $(GTEST_FLAGS)
 	./s21_test
 
 valgrind: 
@@ -40,16 +41,16 @@ clean:
 rebuild: clean s21_matrix_oop.a test 
 
 style:
-	# cp ../materials/linters/.clang-format ./
-	# cp ../materials/linters/.clang-format ./tests/
-	# $(CLANG_FORMAT) -n ./tests/*.c
-	# $(CLANG_FORMAT) -i ./tests/*.c
-	# $(CLANG_FORMAT) -n ./tests/*.c
-	# $(CLANG_FORMAT) -n ./*.c
-	# $(CLANG_FORMAT) -i ./*.c
-	# $(CLANG_FORMAT) -n ./*.c
-	# $(CLANG_FORMAT) -n ./*.h
-	# $(CLANG_FORMAT) -i ./*.h
-	# $(CLANG_FORMAT) -n ./*.h
-	# rm .clang-format
-	# rm ./tests/.clang-format
+	cp ../materials/linters/.clang-format ./
+	cp ../materials/linters/.clang-format ./tests/
+	$(CLANG_FORMAT) -n ./tests/*.c
+	$(CLANG_FORMAT) -i ./tests/*.c
+	$(CLANG_FORMAT) -n ./tests/*.c
+	$(CLANG_FORMAT) -n ./*.c
+	$(CLANG_FORMAT) -i ./*.c
+	$(CLANG_FORMAT) -n ./*.c
+	$(CLANG_FORMAT) -n ./*.h
+	$(CLANG_FORMAT) -i ./*.h
+	$(CLANG_FORMAT) -n ./*.h
+	rm .clang-format
+	rm ./tests/.clang-format

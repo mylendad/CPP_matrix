@@ -1,4 +1,4 @@
-#include "matrix.hh"
+#include "s21_matrix_oop.h"
 
 #include <math.h>
 
@@ -161,7 +161,7 @@ double S21Matrix::Determinant() {
     else {
       for (int i = 0; i < this->rows_; i++) {
         double minor = CalcMinors(*this, 0, i) * this->matrix_[0][i];
-        if (!IsEvenNumber(i)) minor *= -1;
+        if (i % 2 > 0) minor *= -1;
         result += minor;
       }
     }
@@ -216,139 +216,153 @@ S21Matrix& S21Matrix::operator+(const S21Matrix& other) {
 }
 
 S21Matrix& S21Matrix::operator+=(const S21Matrix& other) {
-  if (this->matrix_ != nullptr) {
-    this->CleanMatrix();
-  }
-  this->CopyMatrix(other);
+  // this->CopyMatrix(other);
   this->SumMatrix(other);
   return *this;
 }
 
 S21Matrix& S21Matrix::operator-=(const S21Matrix& other) {
-  if (this->matrix_ != nullptr) {
-    this->CleanMatrix();
-  }
-  this->CopyMatrix(other);
+  // this->CopyMatrix(other);
   this->SubMatrix(other);
   return *this;
 }
 
 S21Matrix& S21Matrix::operator*=(const S21Matrix& other) {
-  if (this->matrix_ != nullptr) {
-    this->CleanMatrix();
-  }
-  this->CopyMatrix(other);
+  // this->CopyMatrix(other);
   this->MulMatrix(other);
   return *this;
 }
 
 double& S21Matrix::operator()(int i, int j) {
-  if (0 > i || this->rows_ < i + 1 || this->cols_ < i + 1 || 0 > j ||
-      this->rows_ < j + 1 || this->cols_ < j + 1)
+  if (0 > i || this->rows_ < i + 1 || this->cols_ < j + 1 || 0 > j)
     throw std::out_of_range("Index is outside the matrix.");
-  if (i < this->rows_ && i >= 0 && j < this->cols_ && j >= 0)
-    return this->matrix_[i][j];
-  else
-    throw std::exception();
+  return this->matrix_[i][j];
 }
 
-int main() {
-  try
+// int main() {
+//   try
 
-  {
-    S21Matrix pM(2, 2);
+//   {
+//     S21Matrix pM(2, 2);
+//     pM.PrintMatr();
+//     S21Matrix pM2(2, 2);  //
+//     pM2.SetNumToMatrix(0, 0, 1.0);
+//     pM2.PrintMatr();
+//     pM.PrintMatr();
+//     pM.SumMatrix(pM2);
+//     std::cout << pM.GetMatrix(0, 0) << std::endl;
+//     S21Matrix pMres{pM};  // CopyMatrix
+//     pMres.PrintMatr();
+//     std::cout << pMres.GetMatrix(0, 0) << std::endl;
+//     pM.SubMatrix(pM2);
+//     std::cout << pM.GetMatrix(0, 0) << std::endl;
+//     S21Matrix pM21 = pM2;
+//     pM21.SumMatrix(pM2);
+//     std::cout << pM21.GetMatrix(0, 0) << std::endl;
+//     pM21.PrintMatr();
+//     pM2.PrintMatr();
+//     std::cout << "!!!pMres eq pM2" << std::endl;
+//     std::cout << pMres.EqMatrix(pM2) << std::endl;
+//     S21Matrix matrix2(std::move(pM2));
+//     std::cout << "!!!pM21 eq matrix2" << std::endl;
+//     std::cout << pM21.EqMatrix(matrix2) << std::endl;
+//     matrix2.PrintMatr();
+//     pM2.PrintMatr();
+//     pM2.PrintMatr();
+//     pM2.PrintMatr();
+//     S21Matrix MSum(2, 2);
+//     MSum.PrintMatr();
+//     MSum = (matrix2 + matrix2) + matrix2;
+//     std::cout << "!!!matrix2" << std::endl;
+//     matrix2.PrintMatr();
+//     std::cout << "!!!MSum" << std::endl;
+//     MSum.PrintMatr();
+//     // S21Matrix MVSum(4, 4);
+//     // std::cout << "!!!MSum *= matrix2;" << std::endl;
+//     // MSum *= MVSum;
 
-    S21Matrix pM2(2, 2);  //
-    pM2.SetNumToMatrix(0, 0, 1.0);
-    pM2.PrintMatr();
-    pM.PrintMatr();
-    pM.SumMatrix(pM2);
-    std::cout << pM.GetMatrix(0, 0) << std::endl;
-    S21Matrix pMres{pM};  // CopyMatrix
-    pMres.PrintMatr();
-    std::cout << pMres.GetMatrix(0, 0) << std::endl;
-    pM.SubMatrix(pM2);
-    std::cout << pM.GetMatrix(0, 0) << std::endl;
-    S21Matrix pM21 = pM2;
-    pM21.SumMatrix(pM2);
-    std::cout << pM21.GetMatrix(0, 0) << std::endl;
-    pM21.PrintMatr();
-    pM2.PrintMatr();
-    std::cout << "!!!pMres eq pM2" << std::endl;
-    std::cout << pMres.EqMatrix(pM2) << std::endl;
-    S21Matrix matrix2(std::move(pM2));
-    std::cout << "!!!pM21 eq matrix2" << std::endl;
-    std::cout << pM21.EqMatrix(matrix2) << std::endl;
-    matrix2.PrintMatr();
-    pM2.PrintMatr();
-    pM2.PrintMatr();
-    pM2.PrintMatr();
-    S21Matrix MSum(2, 2);
-    MSum.PrintMatr();
-    MSum = (matrix2 + matrix2) + matrix2;
-    std::cout << "!!!matrix2" << std::endl;
-    matrix2.PrintMatr();
-    std::cout << "!!!MSum" << std::endl;
-    MSum.PrintMatr();
-    MSum += matrix2;
-    std::cout << "!!!MSum += matrix2;" << std::endl;
-    MSum.PrintMatr();
-    std::cout << MSum(0, 0) << std::endl;
-    MSum(0, 0) = 4.0;
-    MSum(0, 1) = 3.0;
-    // MSum(0, 2) = 3;
-    // MSum(0, 3) = 4;
-    MSum(1, 0) = 6.0;
-    MSum(1, 1) = 3.0;
-    // MSum(1, 2) = 2;
-    // MSum(1, 3) = 8;
-    // MSum(2, 0) = 5;
-    // MSum(2, 1) = 2;
-    // MSum(2, 2) = 1;
-    // MSum(2, 3) = 12;
-    // MSum(3, 0) = 13;
-    // MSum(3, 1) = 14;
-    // MSum(3, 2) = 15;
-    // MSum(3, 3) = 16;
-    std::cout << "!!!MSum" << std::endl;
-    MSum.PrintMatr();
-    S21Matrix pM22;
-    pM22 = MSum.Transpose();  ////
-    std::cout << "!!! MSum.Transpose();" << std::endl;
-    std::cout << "!!!pM22" << std::endl;
-    pM22.PrintMatr();
-    std::cout << "!!! MSum.GetRows() " << MSum.GetRows() << std::endl;
-    S21Matrix pM23 = MSum.CalcComplements();
-    std::cerr << "!!!pM23 = MSum.CalcComplements();" << std::endl;
-    std::cerr << "!!!pM23" << std::endl;
-    pM23.PrintMatr();
+//     MSum.PrintMatr();
+//     std::cout << MSum(0, 0) << std::endl;
+//     S21Matrix MSuma(6, 6);
+//     MSuma.PrintMatr();
+//     MSuma(0, 0) = 2.0;
+//     MSuma(0, 1) = 0.0;
+//     MSuma(0, 2) = 1;
+//     MSuma(0, 3) = 3;
+//     MSuma(0, 4) = 4;
+//     MSuma(0, 5) = 5;
+//     MSuma(1, 0) = 1.0;
+//     MSuma(1, 1) = -1.0;
+//     MSuma(1, 2) = 2;
+//     MSuma(1, 3) = 0;
+//     MSuma(1, 4) = 1;
+//     MSuma(1, 5) = 3;
+//     MSuma(2, 0) = 3;
+//     MSuma(2, 1) = 4;
+//     MSuma(2, 2) = 0;
+//     MSuma(2, 3) = 2;
+//     MSuma(2, 4) = -2;
+//     MSuma(2, 5) = 1;
+//     MSuma(3, 0) = 2;
+//     MSuma(3, 1) = 3;
+//     MSuma(3, 2) = 1;
+//     MSuma(3, 3) = 5;
+//     MSuma(3, 4) = 0;
+//     MSuma(3, 5) = -1;
+//     MSuma(4, 0) = 0.0;
+//     MSuma(4, 1) = 2.0;
+//     MSuma(4, 2) = 3;
+//     MSuma(4, 3) = -1;
+//     MSuma(4, 4) = 4;
+//     MSuma(4, 5) = 2;
+//     MSuma(5, 0) = 1;
+//     MSuma(5, 1) = 0;
+//     MSuma(5, 2) = -2;
+//     MSuma(5, 3) = 3;
+//     MSuma(5, 4) = 1;
+//     MSuma(5, 5) = 0;
 
-    std::cerr << "!!!determ;" << std::endl;
-    std::cerr << MSum.Determinant() << std::endl;
-    // pM23.PrintMatr();
+//     // std::cout << "!!!MSum" << std::endl;
+//     // MSum.PrintMatr();
+//     // S21Matrix pM22;
+//     // pM22 = MSum.Transpose();  ////
+//     // std::cout << "!!! MSum.Transpose();" << std::endl;
+//     // std::cout << "!!!pM22" << std::endl;
+//     // pM22.PrintMatr();
+//     // std::cout << "!!! MSum.GetRows() " << MSum.GetRows() << std::endl;
+//     MSuma.PrintMatr();
+//     S21Matrix pM23 = MSuma.CalcComplements();
+//     std::cerr << "!!!pM23 = MSum.CalcComplements();" << std::endl;
+//     std::cerr << "!!!pM23" << std::endl;
+//     pM23.PrintMatr();
 
-    MSum(0, 0) = 4.0;
-    MSum(0, 1) = 7.0;
-    // MSum(0, 2) = 3;
-    // MSum(0, 3) = 4;
-    MSum(1, 0) = 2.0;
-    MSum(1, 1) = 6.0;
-    MSum.PrintMatr();
-    S21Matrix pM24 = MSum.InverseMatrix();
-    std::cout << "!!! MSum.InverseMatrix();" << std::endl;
-    pM24.PrintMatr();
+//     std::cerr << "!!!determ;" << std::endl;
+//     MSuma.PrintMatr();
+//     std::cerr << MSuma.Determinant() << std::endl;
+//     // pM23.PrintMatr();
 
-    std::cout << MSum(0, 0) << std::endl;
-    std::cout << MSum(0, 0) << std::endl;
-    std::cout << "!!!pM" << std::endl;
-    pM.PrintMatr();
-    std::cout << "!!! MSum.EqMatrix(matrix2)" << std::endl;
-    std::cout << MSum.EqMatrix(matrix2) << std::endl;
-    std::cout << "!!! MSum.EqMatrix(pM)" << std::endl;
-    std::cout << MSum.EqMatrix(pM) << std::endl;
-  } catch (const std::exception& err) {
-    std::cerr << "[exception] " << err.what() << std::endl;
-  }
+//     MSum(0, 0) = 4.0;
+//     MSum(0, 1) = 7.0;
+//     // MSum(0, 2) = 3;
+//     // MSum(0, 3) = 4;
+//     MSum(1, 0) = 2.0;
+//     MSum(1, 1) = 6.0;
+//     MSum.PrintMatr();
+//     S21Matrix pM24 = MSum.InverseMatrix();
+//     std::cout << "!!! MSum.InverseMatrix();" << std::endl;
+//     pM24.PrintMatr();
 
-  return 0;
-}
+//     std::cout << MSum(0, 0) << std::endl;
+//     std::cout << MSum(0, 0) << std::endl;
+//     std::cout << "!!!pM" << std::endl;
+//     pM.PrintMatr();
+//     std::cout << "!!! MSum.EqMatrix(matrix2)" << std::endl;
+//     std::cout << MSum.EqMatrix(matrix2) << std::endl;
+//     std::cout << "!!! MSum.EqMatrix(pM)" << std::endl;
+//     std::cout << MSum.EqMatrix(pM) << std::endl;
+//   } catch (const std::exception& err) {
+//     std::cerr << "[exception] " << err.what() << std::endl;
+//   }
+
+//   return 0;
+// }
