@@ -1,14 +1,43 @@
 #include "s21_matrix_oop.h"
 
-void S21Matrix::CopyMatrix(const S21Matrix& other) {
+void S21Matrix::CopyMatrixSize(const S21Matrix& other) {
   this->rows_ = other.rows_;
   this->cols_ = other.cols_;
+}
+
+void S21Matrix::CopyMatrix(const S21Matrix& other) {
+  if (this->matrix_ != nullptr) {
+    for (int i = 0; i < this->rows_; i++) {
+      delete[] this->matrix_[i];
+    }
+    delete[] this->matrix_;
+  }
   if (other.rows_ != 0 && other.cols_ != 0) {
-    this->matrix_ = new double* [other.rows_] { 0 };
-    for (int i = 0; i < other.rows_; i++) {
-      this->matrix_[i] = new double[other.cols_]{0};
+    this->matrix_ = new double* [this->rows_] { 0 };
+    for (int i = 0; i < this->rows_; i++) {
+      this->matrix_[i] = new double[this->cols_]{0};
       std::memcpy(this->matrix_[i], other.matrix_[i],
-                  other.cols_ * sizeof(double));
+                  this->cols_ * sizeof(double));
+    }
+  } else
+    throw std::exception();
+}
+
+void S21Matrix::CopyNumbersMatrix(const S21Matrix& other) {
+  int min_rows = 0;
+  int min_cols = 0;
+  if (other.rows_ < this->rows_)
+    min_rows = other.rows_;
+  else
+    min_rows = this->rows_;
+  if (other.cols_ < this->cols_)
+    min_cols = other.cols_;
+  else
+    min_cols = this->cols_;
+  if (other.rows_ != 0 && other.cols_ != 0) {
+    for (int i = 0; i < min_rows; i++) {
+      std::memcpy(this->matrix_[i], other.matrix_[i],
+                  min_cols * sizeof(double));
     }
   } else
     throw std::exception();
@@ -33,13 +62,19 @@ int S21Matrix::GetRows() const { return this->rows_; }
 int S21Matrix::GetCols() const { return this->cols_; }
 
 void S21Matrix::SetRows(int rows) {
+  S21Matrix temp(rows, this->cols_);
+  temp.CopyNumbersMatrix(*this);
+
+  *this = temp;
   this->rows_ = rows;
-  S21Matrix(this->rows_, this->cols_);
 }
 
 void S21Matrix::SetCols(int cols) {
+  S21Matrix temp(this->rows_, cols_);
+  temp.CopyNumbersMatrix(*this);
+  // this->cols_ = cols;
+  *this = temp;
   this->cols_ = cols;
-  S21Matrix(this->rows_, this->cols_);
 }
 
 double S21Matrix::GetMatrix(int row, int col) const {
@@ -65,12 +100,6 @@ void S21Matrix::PrintMatr() {
 
 S21Matrix S21Matrix::CreateDeterminateMatrix(S21Matrix& other, int row,
                                              int col) {
-  // if (other.matrix_ == nullptr) {
-  //   throw std::exception();
-
-  // } else if (other.rows_ < 1) {
-  //   throw std::exception();
-  // }
   S21Matrix res(other.rows_ - 1);
   for (int i = 0, x = 0; i < other.rows_; i++) {
     for (int j = 0, y = 0; j < other.rows_; j++) {
@@ -88,14 +117,7 @@ S21Matrix S21Matrix::CreateDeterminateMatrix(S21Matrix& other, int row,
 }
 
 double S21Matrix::CalcMinors(S21Matrix& other, int row, int col) {
-  // if (other.matrix_ == nullptr) {
-  //   throw std::exception();
-  // } else if (this->rows_ < 1) {
-  //   throw std::exception();
-  // }
-
   double minor = 0.0;
-  // int size_matrix = this->rows_;
   S21Matrix temp;
   if (other.rows_ > 2) temp = CreateDeterminateMatrix(other, row, col);
   if (temp.rows_ == 2) minor = EndUnit(temp);
@@ -105,29 +127,8 @@ double S21Matrix::CalcMinors(S21Matrix& other, int row, int col) {
       if (j % 2 > 0) a *= -1;
       minor += a;
     }
-  // std::cout << "!!!CalcMinors" << other.rows_ << minor << std::endl;
   return minor;
 }
-
-// double S21Matrix::CalcMinors(S21Matrix& other, int row, int col) {
-//   double minor = 0.0;
-//   int size_matrix = this->rows_;
-//   S21Matrix temp;
-//   if (other.rows_ > 2) {
-//     temp = CreateDeterminateMatrix(other, row, col);
-//     for (int j = 0; j < size_matrix - 1; j++) {
-//       double a = CalcMinors(temp, 0, j) * temp.matrix_[0][j];
-//       if (j % 2 > 0) a *= -1;
-//       minor += a;
-//     }
-//   } else if (other.rows_ == 2)
-//     std::cout << "!!! other.rows_ == 2" << other.rows_ << std::endl;
-//   minor = EndUnit(temp);
-
-//   // delete temp;
-//   std::cout << "!!! end calc minors" << other.rows_ << std::endl;
-//   return minor;
-// }
 
 double S21Matrix::EndUnit(S21Matrix& other) {
   double result = 0.0;

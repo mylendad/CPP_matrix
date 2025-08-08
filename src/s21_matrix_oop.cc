@@ -11,7 +11,7 @@ S21Matrix::S21Matrix(int rows, int cols) : rows_{rows}, cols_{cols} {
     throw std::invalid_argument("The argument cannot have a negative value.");
   }
   try {
-    this->matrix_ = new double*[rows];
+    this->matrix_ = new double* [rows] { 0 };
   } catch (std::bad_alloc& ba) {
     std::cerr << "bad_alloc caught: " << ba.what() << std::endl;
     return;
@@ -36,6 +36,7 @@ S21Matrix::~S21Matrix() { this->CleanMatrix(); }
 
 S21Matrix::S21Matrix(const S21Matrix& other)
     : rows_(other.rows_), cols_(other.cols_) {
+  this->CopyMatrixSize(other);
   this->CopyMatrix(other);
 }
 
@@ -60,6 +61,9 @@ void S21Matrix::SumMatrix(const S21Matrix& other) {
 }
 
 void S21Matrix::SubMatrix(const S21Matrix& other) {
+  if (this->rows_ != other.rows_ || this->cols_ != other.cols_) {
+    throw std::invalid_argument("Different matrix dimensions.");
+  }
   if (this->rows_ != other.rows_ || this->cols_ != other.cols_) {
     throw std::invalid_argument("Different matrix dimensions.");
   }
@@ -102,13 +106,14 @@ void S21Matrix::MulMatrix(const S21Matrix& other) {
         "of rows of the second matrix.");
   }
 
-  S21Matrix(this->rows_, this->cols_);
+  S21Matrix res(this->rows_, other.cols_);
   for (int i = 0; i < this->rows_; i++) {
-    for (int j = 0; j < this->cols_; j++) {
+    for (int j = 0; j < other.cols_; j++) {
       for (int k = 0; k < other.rows_; k++)
-        this->matrix_[i][j] += (this->matrix_[i][k] * other.matrix_[k][j]);
+        res.matrix_[i][j] += (this->matrix_[i][k] * other.matrix_[k][j]);
     }
   }
+  *this = res;
 }
 
 S21Matrix S21Matrix::Transpose() {
@@ -192,6 +197,7 @@ const S21Matrix& S21Matrix::operator=(const S21Matrix& other) {
   if (this->matrix_ != nullptr) {
     this->CleanMatrix();
   }
+  this->CopyMatrixSize(other);
   this->CopyMatrix(other);
   return *this;
 }

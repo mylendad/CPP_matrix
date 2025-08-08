@@ -44,14 +44,12 @@ TEST_F(S21MatrixTest, DefaultConstructor) {
   S21Matrix m;
   EXPECT_EQ(m.GetRows(), 3);
   EXPECT_EQ(m.GetCols(), 3);
-  //   EXPECT_NE(m.GetMatrix(0, 0), nullptr); // back
 }
 
 TEST_F(S21MatrixTest, ParameterizedConstructor) {
   S21Matrix m(4, 5);
   EXPECT_EQ(m.GetRows(), 4);
   EXPECT_EQ(m.GetCols(), 5);
-  //   EXPECT_NE(m.GetMatrix(0, 0), nullptr);
 }
 
 TEST_F(S21MatrixTest, ConstructorNegativeSize) {
@@ -97,11 +95,11 @@ TEST_F(S21MatrixTest, GetSetElements) {
   EXPECT_DOUBLE_EQ(m1_.GetMatrix(1, 1), 99.5);
 }
 
-// TEST_F(S21MatrixTest, AccessOperator) {
-//   m1_(1, 1) = 7.5;
-//   EXPECT_DOUBLE_EQ(m1_(1, 1), 7.5);
-//   EXPECT_DOUBLE_EQ(m1_(0, 2), 3.0);
-// }
+TEST_F(S21MatrixTest, AccessOperator) {
+  m1_(1, 1) = 7.5;
+  EXPECT_DOUBLE_EQ(m1_(1, 1), 7.5);
+  EXPECT_DOUBLE_EQ(m1_(0, 2), 3.0);
+}
 
 TEST_F(S21MatrixTest, AccessOperatorOutOfRange) {
   EXPECT_THROW(m1_(5, 0), std::out_of_range);
@@ -109,52 +107,53 @@ TEST_F(S21MatrixTest, AccessOperatorOutOfRange) {
   EXPECT_THROW(m1_(-1, 0), std::out_of_range);
 }
 
-// TEST_F(S21MatrixTest, Addition) {
-//   S21Matrix result = m1_ + m2_;
-//   EXPECT_DOUBLE_EQ(result(0, 0), 1.5);
-//   EXPECT_DOUBLE_EQ(result(1, 2), 11.5);
-// }
+TEST_F(S21MatrixTest, Addition) {
+  S21Matrix result = m1_ + m2_;
+  EXPECT_DOUBLE_EQ(result(0, 0), 1.5);
+  EXPECT_DOUBLE_EQ(result(1, 2), 11.5);
+}
 
 TEST_F(S21MatrixTest, AdditionIncompatibleSizes) {
   S21Matrix wrong(3, 3);
   EXPECT_THROW(m1_ + wrong, std::invalid_argument);
 }
 
-// TEST_F(S21MatrixTest, Subtraction) {
-//   S21Matrix result = m1_;
-//   result -= m2_;
-//   EXPECT_DOUBLE_EQ(result(0, 0), 0.5);
-//   EXPECT_DOUBLE_EQ(result(1, 2), 0.5);
-// }
+TEST_F(S21MatrixTest, Subtraction) {
+  S21Matrix result = m1_;
+  result -= m2_;
+  EXPECT_DOUBLE_EQ(result(0, 0), 0.5);
+  EXPECT_DOUBLE_EQ(result(1, 2), 0.5);
+}
 
-// TEST_F(S21MatrixTest, MultiplicationByNumber) {
-//   m1_.MulNumber(2.5);
-//   EXPECT_DOUBLE_EQ(m1_(0, 0), 2.5);
-//   EXPECT_DOUBLE_EQ(m1_(1, 2), 15.0);
-// }
+TEST_F(S21MatrixTest, MultiplicationByNumber) {
+  m1_.MulNumber(2.5);
+  EXPECT_DOUBLE_EQ(m1_(0, 0), 2.5);
+  EXPECT_DOUBLE_EQ(m1_(1, 2), 15.0);
+}
 
-// TEST_F(S21MatrixTest, MatrixMultiplication) {
-//   S21Matrix a(2, 3);
-//   a.SetNumToMatrix(0, 0, 1);
-//   a.SetNumToMatrix(0, 1, 2);
-//   a.SetNumToMatrix(0, 2, 3);
-//   a.SetNumToMatrix(1, 0, 4);
-//   a.SetNumToMatrix(1, 1, 5);
-//   a.SetNumToMatrix(1, 2, 6);
-//   S21Matrix b(3, 2);
-//   b.SetNumToMatrix(0, 0, 7);
-//   b.SetNumToMatrix(0, 1, 8);
-//   b.SetNumToMatrix(1, 0, 9);
-//   b.SetNumToMatrix(1, 1, 10);
-//   b.SetNumToMatrix(2, 0, 11);
-//   b.SetNumToMatrix(2, 1, 12);
+TEST_F(S21MatrixTest, MatrixMultiplication) {
+  S21Matrix a(2, 3);
+  a.SetNumToMatrix(0, 0, 1);
+  a.SetNumToMatrix(0, 1, 2);
+  a.SetNumToMatrix(0, 2, 3);
+  a.SetNumToMatrix(1, 0, 4);
+  a.SetNumToMatrix(1, 1, 5);
+  a.SetNumToMatrix(1, 2, 6);
+  S21Matrix b(3, 2);
+  b.SetNumToMatrix(0, 0, 7);
+  b.SetNumToMatrix(0, 1, 8);
+  b.SetNumToMatrix(1, 0, 9);
+  b.SetNumToMatrix(1, 1, 10);
+  b.SetNumToMatrix(2, 0, 11);
+  b.SetNumToMatrix(2, 1, 12);
 
-//   a *= b;
-//   EXPECT_EQ(a.GetRows(), 2);
-//   EXPECT_EQ(a.GetCols(), 2);
-//   EXPECT_DOUBLE_EQ(a(0, 0), 58);
-//   EXPECT_DOUBLE_EQ(a(1, 1), 154);
-// }
+  // a.MulMatrix(b);
+  a *= b;
+  EXPECT_EQ(a.GetRows(), 2);
+  EXPECT_EQ(a.GetCols(), 2);
+  EXPECT_DOUBLE_EQ(a(0, 0), 58);
+  EXPECT_DOUBLE_EQ(a(1, 1), 154);
+}
 
 TEST_F(S21MatrixTest, MatrixMultiplicationIncompatible) {
   S21Matrix wrong(4, 4);
@@ -181,13 +180,13 @@ TEST_F(S21MatrixTest, EqualityWithPrecision) {
   EXPECT_TRUE(a.EqMatrix(b) == 0);
 }
 
-// TEST_F(S21MatrixTest, Transpose) {
-//   S21Matrix transposed = m1_.Transpose();
-//   EXPECT_EQ(transposed.GetRows(), 3);
-//   EXPECT_EQ(transposed.GetCols(), 2);
-//   EXPECT_DOUBLE_EQ(transposed(0, 0), 1.0);
-//   EXPECT_DOUBLE_EQ(transposed(2, 1), 6.0);
-// }
+TEST_F(S21MatrixTest, Transpose) {
+  S21Matrix transposed = m1_.Transpose();
+  EXPECT_EQ(transposed.GetRows(), 3);
+  EXPECT_EQ(transposed.GetCols(), 2);
+  EXPECT_DOUBLE_EQ(transposed(0, 0), 1.0);
+  EXPECT_DOUBLE_EQ(transposed(2, 1), 6.0);
+}
 
 TEST_F(S21MatrixTest, Determinant) {
   EXPECT_DOUBLE_EQ(square_.Determinant(), -40.0);
@@ -197,9 +196,9 @@ TEST_F(S21MatrixTest, Determinant) {
   EXPECT_DOUBLE_EQ(single.Determinant(), 5.5);
 }
 
-// TEST_F(S21MatrixTest, DeterminantNonSquare) {
-//   EXPECT_THROW(m1_.Determinant(), std::invalid_argument);
-// }
+TEST_F(S21MatrixTest, DeterminantNonSquare) {
+  EXPECT_THROW(m1_.Determinant(), std::invalid_argument);
+}
 
 TEST_F(S21MatrixTest, CalcComplements) {
   S21Matrix comp = square_.CalcComplements();
@@ -208,45 +207,52 @@ TEST_F(S21MatrixTest, CalcComplements) {
   EXPECT_DOUBLE_EQ(comp(0, 2), -20.0);
 }
 
-// TEST_F(S21MatrixTest, CalcComplementsNonSquare) {
-//   EXPECT_THROW(m1_.CalcComplements(), std::invalid_argument);
-// }
+TEST_F(S21MatrixTest, CalcComplementsNonSquare) {
+  EXPECT_THROW(m1_.CalcComplements(), std::invalid_argument);
+}
 
-// TEST_F(S21MatrixTest, InverseMatrix) {
-//   S21Matrix inv = square_.InverseMatrix();
-//   EXPECT_NEAR(inv(0, 0), 0.0, 1e-9);
-//   EXPECT_NEAR(inv(0, 1), -0.1, 1e-9);
-//   EXPECT_NEAR(inv(0, 2), 0.2, 1e-9);
-//   EXPECT_NEAR(inv(1, 0), 0.25, 1e-9);
-// }
+TEST_F(S21MatrixTest, InverseMatrix) {
+  S21Matrix inv = square_.InverseMatrix();
+  S21Matrix res_square_(3, 3);
+  res_square_.SetNumToMatrix(0, 0, 0);
+  res_square_.SetNumToMatrix(0, 1, -0.1);
+  res_square_.SetNumToMatrix(0, 2, 0.2);
+  res_square_.SetNumToMatrix(1, 0, -0.25);
+  res_square_.SetNumToMatrix(1, 1, 0.35);
+  res_square_.SetNumToMatrix(1, 2, 0.05);
+  res_square_.SetNumToMatrix(2, 0, 0.5);
+  res_square_.SetNumToMatrix(2, 1, -0.2);
+  res_square_.SetNumToMatrix(2, 2, -0.1);
 
-// TEST_F(S21MatrixTest, InverseSingularMatrix) {
-//   S21Matrix singular(2, 2);
-//   singular(0, 0) = 1;
-//   singular(0, 1) = 2;
-//   singular(1, 0) = 2;
-//   singular(1, 1) = 4;
-//   EXPECT_THROW(singular.InverseMatrix(), std::invalid_argument);
-// }
+  EXPECT_DOUBLE_EQ(inv(0, 0), res_square_(0, 0));
+  EXPECT_DOUBLE_EQ(inv(0, 1), res_square_(0, 1));
+  EXPECT_DOUBLE_EQ(inv(0, 2), res_square_(0, 2));
+  EXPECT_DOUBLE_EQ(inv(1, 0), res_square_(1, 0));
+  EXPECT_DOUBLE_EQ(inv(1, 1), res_square_(1, 1));
+  EXPECT_DOUBLE_EQ(inv(1, 2), res_square_(1, 2));
+  EXPECT_DOUBLE_EQ(inv(2, 0), res_square_(2, 0));
+  EXPECT_DOUBLE_EQ(inv(2, 1), res_square_(2, 1));
+  EXPECT_DOUBLE_EQ(inv(2, 2), res_square_(2, 2));
+}
 
-// TEST_F(S21MatrixTest, CopyToSelf) {
-//   m1_ = m1_;
-//   EXPECT_DOUBLE_EQ(m1_(0, 0), 1.0);
-//   EXPECT_DOUBLE_EQ(m1_(1, 2), 6.0);
-// }
+TEST_F(S21MatrixTest, InverseSingularMatrix) {
+  S21Matrix singular(2, 2);
+  singular(0, 0) = 1;
+  singular(0, 1) = 2;
+  singular(1, 0) = 2;
+  singular(1, 1) = 4;
+  EXPECT_THROW(singular.InverseMatrix(), std::invalid_argument);
+}
 
-// TEST_F(S21MatrixTest, MoveToSelf) {
-//   m1_ = std::move(m1_);
-//   EXPECT_GT(m1_.GetRows(), 0);
-// }
+TEST_F(S21MatrixTest, CopyToSelf) {
+  m1_ = m1_;
+  EXPECT_DOUBLE_EQ(m1_(0, 0), 1.0);
+  EXPECT_DOUBLE_EQ(m1_(1, 2), 6.0);
+}
 
-TEST_F(S21MatrixTest, EmptyMatrixOperations) {
-  S21Matrix empty;
-  empty.CleanMatrix();
-
-  EXPECT_THROW(empty.SumMatrix(m1_), std::exception);
-  // EXPECT_THROW(empty.Transpose(), std::exception);
-  // EXPECT_THROW(empty.GetMatrix(0, 0), std::exception);
+TEST_F(S21MatrixTest, MoveToSelf) {
+  m1_ = std::move(m1_);
+  EXPECT_GT(m1_.GetRows(), 0);
 }
 
 TEST_F(S21MatrixTest, SetRowsCols) {

@@ -68,7 +68,16 @@ class S21Matrix {
 
   double GetMatrix(int row, int col) const;
 
+  void SetNumToMatrix(int row, int col, double number);
+
+  void PrintMatr();
+
+ private:
+  void CopyMatrixSize(const S21Matrix& other);
+
   void CopyMatrix(const S21Matrix& other);
+
+  void CopyNumbersMatrix(const S21Matrix& other);
 
   void CleanMatrix();
 
@@ -81,8 +90,4 @@ class S21Matrix {
   double TrimerNumb(double src);
 
   bool IsEvenNumber(int number);
-
-  void SetNumToMatrix(int row, int col, double number);
-
-  void PrintMatr();
 };
