@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -Wall  -g
+CFLAGS = -Wall -Werror -Wextra -g
 STD = -std=c++20 
 GCOV_FLAGS = -fprofile-arcs -ftest-coverage
 GTEST_FLAGS = -lgtest
@@ -12,7 +12,6 @@ ifeq ($(shell uname), Linux)
 	GTEST_FLAGS += -lgtest
 else
 	GTEST_FLAGS += -ld64
-	# GTEST_FLAGS = -lgtest
 	CLANG_FORMAT = clang-format
 endif
 

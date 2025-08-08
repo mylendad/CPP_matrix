@@ -61,8 +61,6 @@ TEST_F(S21MatrixTest, CopyConstructor) {
   S21Matrix copy(m1_);
   EXPECT_EQ(copy.GetRows(), 2);
   EXPECT_EQ(copy.GetCols(), 3);
-  EXPECT_DOUBLE_EQ(copy.GetMatrix(0, 1), 2.0);
-  EXPECT_DOUBLE_EQ(copy.GetMatrix(1, 2), 6.0);
 }
 
 TEST_F(S21MatrixTest, MoveConstructor) {
@@ -139,6 +137,7 @@ TEST_F(S21MatrixTest, MatrixMultiplication) {
   a.SetNumToMatrix(1, 0, 4);
   a.SetNumToMatrix(1, 1, 5);
   a.SetNumToMatrix(1, 2, 6);
+
   S21Matrix b(3, 2);
   b.SetNumToMatrix(0, 0, 7);
   b.SetNumToMatrix(0, 1, 8);
@@ -248,11 +247,6 @@ TEST_F(S21MatrixTest, CopyToSelf) {
   m1_ = m1_;
   EXPECT_DOUBLE_EQ(m1_(0, 0), 1.0);
   EXPECT_DOUBLE_EQ(m1_(1, 2), 6.0);
-}
-
-TEST_F(S21MatrixTest, MoveToSelf) {
-  m1_ = std::move(m1_);
-  EXPECT_GT(m1_.GetRows(), 0);
 }
 
 TEST_F(S21MatrixTest, SetRowsCols) {

@@ -64,7 +64,6 @@ int S21Matrix::GetCols() const { return this->cols_; }
 void S21Matrix::SetRows(int rows) {
   S21Matrix temp(rows, this->cols_);
   temp.CopyNumbersMatrix(*this);
-
   *this = temp;
   this->rows_ = rows;
 }
@@ -72,7 +71,6 @@ void S21Matrix::SetRows(int rows) {
 void S21Matrix::SetCols(int cols) {
   S21Matrix temp(this->rows_, cols_);
   temp.CopyNumbersMatrix(*this);
-  // this->cols_ = cols;
   *this = temp;
   this->cols_ = cols;
 }
@@ -124,7 +122,7 @@ double S21Matrix::CalcMinors(S21Matrix& other, int row, int col) {
   if (temp.rows_ > 2)
     for (int j = 0; j < temp.rows_ - 1; j++) {
       double a = CalcMinors(temp, 0, j) * temp.matrix_[0][j];
-      if (j % 2 > 0) a *= -1;
+      if (!IsEvenNumber(j)) a *= -1;
       minor += a;
     }
   return minor;
@@ -145,8 +143,8 @@ double S21Matrix::TrimerNumb(double src) {
   return result;
 }
 
-bool S21Matrix::IsEvenNumber(int number) {
-  bool result = FALSE;
+bool S21Matrix::IsEvenNumber(int number) const {
+    bool result = FALSE;
   if (number % 2 > 0) result = TRUE;
   return result;
 }
