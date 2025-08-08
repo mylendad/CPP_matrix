@@ -89,5 +89,5 @@ class S21Matrix {
 
   double TrimerNumb(double src);
 
-  bool IsEvenNumber(int number);
+  bool IsEvenNumber(int number) const;
 };
