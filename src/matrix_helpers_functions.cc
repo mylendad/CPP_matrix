@@ -144,7 +144,7 @@ double S21Matrix::TrimerNumb(double src) {
 }
 
 bool S21Matrix::IsEvenNumber(int number) const {
-    bool result = FALSE;
+  bool result = FALSE;
   if (number % 2 > 0) result = TRUE;
   return result;
 }

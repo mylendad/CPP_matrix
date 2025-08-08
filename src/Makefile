@@ -42,12 +42,12 @@ rebuild: clean s21_matrix_oop.a test
 style:
 	cp ../materials/linters/.clang-format ./
 	cp ../materials/linters/.clang-format ./tests/
-	$(CLANG_FORMAT) -n ./tests/*.c
-	$(CLANG_FORMAT) -i ./tests/*.c
-	$(CLANG_FORMAT) -n ./tests/*.c
-	$(CLANG_FORMAT) -n ./*.c
-	$(CLANG_FORMAT) -i ./*.c
-	$(CLANG_FORMAT) -n ./*.c
+	$(CLANG_FORMAT) -n ./tests/*.cc
+	$(CLANG_FORMAT) -i ./tests/*.cc
+	$(CLANG_FORMAT) -n ./tests/*.cc
+	$(CLANG_FORMAT) -n ./*.cc
+	$(CLANG_FORMAT) -i ./*.cc
+	$(CLANG_FORMAT) -n ./*.cc
 	$(CLANG_FORMAT) -n ./*.h
 	$(CLANG_FORMAT) -i ./*.h
 	$(CLANG_FORMAT) -n ./*.h
