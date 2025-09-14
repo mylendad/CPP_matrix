@@ -1,6 +1,6 @@
 #include "s21_matrix_oop.h"
 
-void S21Matrix::CopyMatrixSize(const S21Matrix& other) {
+void S21Matrix::CopyMatrixSize(const S21Matrix& other) noexcept {
   this->rows_ = other.rows_;
   this->cols_ = other.cols_;
 }
@@ -12,6 +12,8 @@ void S21Matrix::CopyMatrix(const S21Matrix& other) {
     }
     delete[] this->matrix_;
   }
+  this->rows_ = other.rows_;
+  this->cols_ = other.cols_;
   if (other.rows_ != 0 && other.cols_ != 0) {
     this->matrix_ = new double* [this->rows_] { 0 };
     for (int i = 0; i < this->rows_; i++) {
@@ -43,15 +45,14 @@ void S21Matrix::CopyNumbersMatrix(const S21Matrix& other) {
     throw std::exception();
 }
 
-void S21Matrix::CleanMatrix() {
+void S21Matrix::CleanMatrix() noexcept {
   if (this->matrix_ == nullptr) return;
-  for (int i = 0; i < this->rows_; i++) {
-    if (this->matrix_[i] != nullptr) {
-      delete[] this->matrix_[i];
-      this->matrix_[i] = nullptr;
+  for (int i = 0; i < rows_ && rows_ > 0; i++) {
+    if (matrix_[i] != nullptr) {
+      delete[] matrix_[i];
     }
   }
-  delete[] this->matrix_;
+  delete[] matrix_;
   this->matrix_ = nullptr;
   this->rows_ = 0;
   this->cols_ = 0;
@@ -69,7 +70,7 @@ void S21Matrix::SetRows(int rows) {
 }
 
 void S21Matrix::SetCols(int cols) {
-  S21Matrix temp(this->rows_, cols_);
+  S21Matrix temp(this->rows_, cols);
   temp.CopyNumbersMatrix(*this);
   *this = temp;
   this->cols_ = cols;
@@ -79,7 +80,7 @@ double S21Matrix::GetMatrix(int row, int col) const {
   return this->matrix_[row][col];
 }
 
-void S21Matrix::SetNumToMatrix(int row, int col, double number) {
+void S21Matrix::SetNumToMatrix(int row, int col, double number) noexcept {
   this->matrix_[row][col] = number;
 }
 
@@ -97,7 +98,7 @@ void S21Matrix::PrintMatr() {
 }
 
 S21Matrix S21Matrix::CreateDeterminateMatrix(S21Matrix& other, int row,
-                                             int col) {
+                                             int col) noexcept {
   S21Matrix res(other.rows_ - 1);
   for (int i = 0, x = 0; i < other.rows_; i++) {
     for (int j = 0, y = 0; j < other.rows_; j++) {
@@ -114,7 +115,7 @@ S21Matrix S21Matrix::CreateDeterminateMatrix(S21Matrix& other, int row,
   return res;
 }
 
-double S21Matrix::CalcMinors(S21Matrix& other, int row, int col) {
+double S21Matrix::CalcMinors(S21Matrix& other, int row, int col) noexcept {
   double minor = 0.0;
   S21Matrix temp;
   if (other.rows_ > 2) temp = CreateDeterminateMatrix(other, row, col);
@@ -128,18 +129,10 @@ double S21Matrix::CalcMinors(S21Matrix& other, int row, int col) {
   return minor;
 }
 
-double S21Matrix::EndUnit(S21Matrix& other) {
+double S21Matrix::EndUnit(S21Matrix& other) noexcept {
   double result = 0.0;
   result = (other.matrix_[0][0] * other.matrix_[1][1]) -
            (other.matrix_[0][1] * other.matrix_[1][0]);
-  return result;
-}
-
-double S21Matrix::TrimerNumb(double src) {
-  double result = 0;
-  char buffer[BUFFER_TRIMMER];
-  sprintf(buffer, "%.7lf", src);
-  sscanf(buffer, "%lf", &result);
   return result;
 }
 

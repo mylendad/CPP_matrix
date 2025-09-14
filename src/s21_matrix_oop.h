@@ -1,3 +1,6 @@
+#ifndef S21_MATRIX_OOP_H
+#define S21_MATRIX_OOP_H
+
 #include <math.h>
 
 #include <cstring>
@@ -6,13 +9,9 @@
 
 #define TRUE 1
 #define FALSE 0
-#define BUFFER_TRIMMER 20
+#define EPSILON 1e-7
 
 class S21Matrix {
- private:
-  int rows_, cols_;
-  double** matrix_ = nullptr;
-
  public:
   S21Matrix(int rows, int cols);
 
@@ -22,21 +21,21 @@ class S21Matrix {
 
   ~S21Matrix();
 
-  S21Matrix(const S21Matrix& other);
+  S21Matrix(const S21Matrix &other);
 
-  S21Matrix(S21Matrix&& other);
+  S21Matrix(S21Matrix &&other);
 
-  void SumMatrix(const S21Matrix& other);
+  void SumMatrix(const S21Matrix &other);
 
-  void SubMatrix(const S21Matrix& other);
+  void SubMatrix(const S21Matrix &other);
 
-  int EqMatrix(const S21Matrix& other);
+  bool EqMatrix(const S21Matrix &other) noexcept;
 
-  void MulNumber(const double number);
+  void MulNumber(const double number) noexcept;
 
-  void MulMatrix(const S21Matrix& other);
+  void MulMatrix(const S21Matrix &other);
 
-  S21Matrix Transpose();
+  S21Matrix Transpose() noexcept;
 
   S21Matrix CalcComplements();
 
@@ -44,19 +43,31 @@ class S21Matrix {
 
   S21Matrix InverseMatrix();
 
-  const S21Matrix& operator=(const S21Matrix& other);
+  const S21Matrix &operator=(const S21Matrix &other) noexcept;
 
-  S21Matrix& operator=(S21Matrix&& other) noexcept;
+  S21Matrix &operator=(S21Matrix &&other) noexcept;
 
-  S21Matrix& operator+(const S21Matrix& other);
+  bool operator==(S21Matrix &other) noexcept;
 
-  S21Matrix& operator+=(const S21Matrix& other);
+  S21Matrix operator+(const S21Matrix &other) const;
 
-  S21Matrix& operator-=(const S21Matrix& other);
+  S21Matrix operator-(const S21Matrix &other) const;
 
-  S21Matrix& operator*=(const S21Matrix& other);
+  S21Matrix operator*(const S21Matrix &other) const;
 
-  double& operator()(int i, int j);
+  S21Matrix operator*(const double number) const;
+
+  friend S21Matrix operator*(double number, const S21Matrix &matrix);
+
+  S21Matrix &operator+=(const S21Matrix &other);
+
+  S21Matrix &operator-=(const S21Matrix &other);
+
+  S21Matrix &operator*=(const S21Matrix &other);
+
+  S21Matrix &operator*=(const double number);
+
+  double &operator()(int i, int j);
 
   int GetRows() const;
 
@@ -68,26 +79,31 @@ class S21Matrix {
 
   double GetMatrix(int row, int col) const;
 
-  void SetNumToMatrix(int row, int col, double number);
+  void SetNumToMatrix(int row, int col, double number) noexcept;
 
   void PrintMatr();
 
  private:
-  void CopyMatrixSize(const S21Matrix& other);
+  int rows_, cols_;
 
-  void CopyMatrix(const S21Matrix& other);
+  double **matrix_ = nullptr;
 
-  void CopyNumbersMatrix(const S21Matrix& other);
+  void CopyMatrixSize(const S21Matrix &other) noexcept;
 
-  void CleanMatrix();
+  void CopyMatrix(const S21Matrix &other);
 
-  double CalcMinors(S21Matrix& other, int row, int col);
+  void CopyNumbersMatrix(const S21Matrix &other);
 
-  S21Matrix CreateDeterminateMatrix(S21Matrix& other, int row, int col);
+  void CleanMatrix() noexcept;
 
-  double EndUnit(S21Matrix& other);
+  double CalcMinors(S21Matrix &other, int row, int col) noexcept;
 
-  double TrimerNumb(double src);
+  S21Matrix CreateDeterminateMatrix(S21Matrix &other, int row,
+                                    int col) noexcept;
+
+  double EndUnit(S21Matrix &other) noexcept;
 
   bool IsEvenNumber(int number) const;
 };
+
+#endif  // S21_MATRIX_OOP_H

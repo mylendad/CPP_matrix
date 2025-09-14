@@ -161,10 +161,10 @@ TEST_F(S21MatrixTest, MatrixMultiplicationIncompatible) {
 
 TEST_F(S21MatrixTest, Equality) {
   S21Matrix copy = m1_;
-  EXPECT_TRUE(m1_.EqMatrix(copy) == 0);
+  EXPECT_TRUE(m1_.EqMatrix(copy));
 
   copy.SetNumToMatrix(1, 1, 99.9);
-  EXPECT_TRUE(m1_.EqMatrix(copy) == 1);
+  EXPECT_FALSE(m1_.EqMatrix(copy));
 }
 
 TEST_F(S21MatrixTest, EqualityWithPrecision) {
@@ -176,7 +176,7 @@ TEST_F(S21MatrixTest, EqualityWithPrecision) {
   b.SetNumToMatrix(0, 0, 0.12345679);
   b.SetNumToMatrix(0, 1, 0.87654321);
 
-  EXPECT_TRUE(a.EqMatrix(b) == 0);
+  EXPECT_TRUE(a.EqMatrix(b));
 }
 
 TEST_F(S21MatrixTest, Transpose) {
@@ -294,6 +294,200 @@ TEST_F(S21MatrixTest, DeterminantPrecision) {
   m(2, 2) = 0.0000009;
 
   EXPECT_NEAR(m.Determinant(), 0.0, 1e-15);
+}
+
+TEST_F(S21MatrixTest, ConstructorsAndDestructors) {
+  S21Matrix default_mat;
+  EXPECT_EQ(default_mat.GetRows(), 3);
+  EXPECT_EQ(default_mat.GetCols(), 3);
+
+  S21Matrix square_mat(5);
+  EXPECT_EQ(square_mat.GetRows(), 5);
+  EXPECT_EQ(square_mat.GetCols(), 5);
+
+  S21Matrix copy_mat(m1_);
+  EXPECT_TRUE(copy_mat.EqMatrix(m1_));
+
+  S21Matrix temp(m1_);
+  S21Matrix move_mat(std::move(temp));
+  EXPECT_TRUE(move_mat.EqMatrix(m1_));
+  EXPECT_EQ(temp.GetRows(), 0);
+  EXPECT_EQ(temp.GetCols(), 0);
+}
+
+TEST_F(S21MatrixTest, AssignmentOperators) {
+  S21Matrix copy_mat;
+  copy_mat = m1_;
+  EXPECT_TRUE(copy_mat.EqMatrix(m1_));
+
+  copy_mat = copy_mat;
+  EXPECT_TRUE(copy_mat.EqMatrix(m1_));
+
+  S21Matrix temp(m1_);
+  S21Matrix move_mat;
+  move_mat = std::move(temp);
+  EXPECT_TRUE(move_mat.EqMatrix(m1_));
+  EXPECT_EQ(temp.GetRows(), 0);
+  EXPECT_EQ(temp.GetCols(), 0);
+}
+
+TEST_F(S21MatrixTest, ExceptionCases) {
+  S21Matrix wrong_size(5, 5);
+  EXPECT_THROW(m1_ + wrong_size, std::invalid_argument);
+  EXPECT_THROW(m1_ += wrong_size, std::invalid_argument);
+
+  EXPECT_THROW(m1_ - wrong_size, std::invalid_argument);
+  EXPECT_THROW(m1_ -= wrong_size, std::invalid_argument);
+
+  EXPECT_THROW(m1_ * wrong_size, std::invalid_argument);
+  EXPECT_THROW(m1_ *= wrong_size, std::invalid_argument);
+
+  EXPECT_THROW(m1_.Determinant(), std::invalid_argument);
+
+  EXPECT_THROW(m1_.CalcComplements(), std::invalid_argument);
+
+  S21Matrix singular(2, 2);
+  singular(0, 0) = 1;
+  singular(0, 1) = 2;
+  singular(1, 0) = 2;
+  singular(1, 1) = 4;
+  EXPECT_THROW(singular.InverseMatrix(), std::invalid_argument);
+}
+
+TEST_F(S21MatrixTest, EdgeCases) {
+  S21Matrix single(1, 1);
+  single(0, 0) = 5.0;
+  EXPECT_DOUBLE_EQ(single.Determinant(), 5.0);
+
+  S21Matrix inv_single = single.InverseMatrix();
+  EXPECT_DOUBLE_EQ(inv_single(0, 0), 0.2);
+
+  S21Matrix small(2, 2);
+  small(0, 0) = 1;
+  small(0, 1) = 2;
+  small(1, 0) = 3;
+  small(1, 1) = 4;
+
+  EXPECT_DOUBLE_EQ(small.Determinant(), -2.0);
+
+  S21Matrix zero_mult = m1_ * 0.0;
+  for (int i = 0; i < zero_mult.GetRows(); i++) {
+    for (int j = 0; j < zero_mult.GetCols(); j++) {
+      EXPECT_DOUBLE_EQ(zero_mult(i, j), 0.0);
+    }
+  }
+}
+
+TEST_F(S21MatrixTest, PrivateMethodsCoverage) {
+  S21Matrix comp = square_.CalcComplements();
+  EXPECT_EQ(comp.GetRows(), 3);
+  EXPECT_EQ(comp.GetCols(), 3);
+
+  S21Matrix transposed = m1_.Transpose();
+  EXPECT_EQ(transposed.GetRows(), 3);
+  EXPECT_EQ(transposed.GetCols(), 2);
+
+  S21Matrix mat4x4(4, 4);
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 4; j++) {
+      mat4x4(i, j) = i * 4 + j + 1;
+    }
+  }
+  EXPECT_NO_THROW(mat4x4.Determinant());
+}
+
+TEST_F(S21MatrixTest, AccessOperators) {
+  m1_(0, 0) = 100.0;
+  EXPECT_DOUBLE_EQ(m1_(0, 0), 100.0);
+
+  double value = m1_(1, 1);
+  EXPECT_DOUBLE_EQ(value, 5.0);
+
+  EXPECT_THROW(m1_(10, 0), std::out_of_range);
+  EXPECT_THROW(m1_(0, 10), std::out_of_range);
+  EXPECT_THROW(m1_(-1, 0), std::out_of_range);
+  EXPECT_THROW(m1_(0, -1), std::out_of_range);
+}
+
+TEST_F(S21MatrixTest, OperatorMultiplyEqualNumber) {
+  S21Matrix result = m1_;
+  result *= 2.0;
+  EXPECT_DOUBLE_EQ(result(0, 0), 2.0);
+  EXPECT_DOUBLE_EQ(result(1, 2), 12.0);
+}
+
+TEST_F(S21MatrixTest, OperatorMultiplyNumberRight) {
+  S21Matrix result = m1_ * 2.0;
+  EXPECT_DOUBLE_EQ(result(0, 0), 2.0);
+  EXPECT_DOUBLE_EQ(result(1, 2), 12.0);
+}
+
+TEST_F(S21MatrixTest, OperatorMultiplyNumberLeft) {
+  S21Matrix result = 2.0 * m1_;
+  EXPECT_DOUBLE_EQ(result(0, 0), 2.0);
+  EXPECT_DOUBLE_EQ(result(1, 2), 12.0);
+}
+
+TEST_F(S21MatrixTest, SetRowsColsEdgeCases) {
+  S21Matrix test_mat(2, 3);
+  test_mat(0, 0) = 1;
+  test_mat(0, 1) = 2;
+  test_mat(0, 2) = 3;
+  test_mat(1, 0) = 4;
+  test_mat(1, 1) = 5;
+  test_mat(1, 2) = 6;
+
+  test_mat.SetRows(4);
+  EXPECT_EQ(test_mat.GetRows(), 4);
+  EXPECT_DOUBLE_EQ(test_mat(0, 0), 1.0);
+  EXPECT_DOUBLE_EQ(test_mat(1, 2), 6.0);
+
+  test_mat.SetCols(2);
+  EXPECT_EQ(test_mat.GetCols(), 2);
+  EXPECT_DOUBLE_EQ(test_mat(0, 0), 1.0);
+  EXPECT_DOUBLE_EQ(test_mat(0, 1), 2.0);
+
+  EXPECT_THROW(test_mat.SetRows(0), std::invalid_argument);
+  EXPECT_THROW(test_mat.SetCols(0), std::invalid_argument);
+}
+
+TEST_F(S21MatrixTest, IsEvenNumberMethod) {
+  S21Matrix mat;
+  S21Matrix comp = square_.CalcComplements();
+  EXPECT_NO_THROW(comp.GetMatrix(0, 0));
+}
+
+TEST_F(S21MatrixTest, EndUnitMethod) {
+  S21Matrix mat2x2(2, 2);
+  mat2x2(0, 0) = 1;
+  mat2x2(0, 1) = 2;
+  mat2x2(1, 0) = 3;
+  mat2x2(1, 1) = 4;
+
+  double det = mat2x2.Determinant();
+  EXPECT_DOUBLE_EQ(det, -2.0);
+}
+
+TEST_F(S21MatrixTest, CreateDeterminateMatrixMethod) {
+  S21Matrix comp = square_.CalcComplements();
+  EXPECT_EQ(comp.GetRows(), 3);
+}
+
+TEST_F(S21MatrixTest, SpecialMultiplicationCases) {
+  S21Matrix identity(3, 3);
+  identity(0, 0) = 1;
+  identity(1, 1) = 1;
+  identity(2, 2) = 1;
+
+  S21Matrix result = square_ * identity;
+  EXPECT_TRUE(result.EqMatrix(square_));
+
+  S21Matrix scaled = m1_ * 2.0;
+  for (int i = 0; i < m1_.GetRows(); i++) {
+    for (int j = 0; j < m1_.GetCols(); j++) {
+      EXPECT_DOUBLE_EQ(scaled(i, j), m1_(i, j) * 2.0);
+    }
+  }
 }
 
 int main(int argc, char** argv) {
